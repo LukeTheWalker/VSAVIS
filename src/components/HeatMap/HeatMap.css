@@ -1,0 +1,10 @@
+.heatmapDivContainer{
+    height: 100%;
+    width: 100%;
+}
+
+.select div{
+    font-family: 'Roboto', sans-serif;
+    font-size: 15px;
+    border-radius: 5px;
+}

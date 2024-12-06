@@ -1,0 +1,22 @@
+.App {
+    text-align: center;
+    height: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+}
+
+.row:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+.col2{
+    float: left;
+    width: 50%;
+}
+
+text {
+    font-family: 'Roboto', sans-serif;
+}
