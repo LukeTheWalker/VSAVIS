@@ -10,7 +10,6 @@ function App() {
     const resizedRef = useRef(useSelector(state => state.global.resized)); // Use a ref to persist the value
 
     useEffect(() => {
-
         const handleResize = () => {
             clearTimeout(window.resizeend);
             window.resizeend = setTimeout(() => {
