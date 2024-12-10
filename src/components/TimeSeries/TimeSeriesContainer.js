@@ -18,7 +18,7 @@ function TimeSeriesContainer() {
         let height;
         if (divTimeSeriesContainerRef.current !== undefined) {
             width = divTimeSeriesContainerRef.current.clientWidth
-            height = divTimeSeriesContainerRef.current.clientHeight - 50
+            height = divTimeSeriesContainerRef.current.clientHeight
         }
         if (width > height) {
             width = height;

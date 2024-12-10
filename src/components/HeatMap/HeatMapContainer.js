@@ -20,8 +20,8 @@ function HeatMapContainer() {
         let width;
         let height;
         if (divContainerRef.current !== undefined) {
-            width = divContainerRef.current.clientWidth
-            height = divContainerRef.current.clientHeight
+            width=divContainerRef.current.offsetWidth;
+            height= 500;
         }
         return { width: width, height: height };
     }

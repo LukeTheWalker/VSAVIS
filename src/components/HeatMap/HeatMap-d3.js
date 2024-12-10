@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
 
 class HeatMapD3 {
-    margin = { top: 10, right: 10, bottom: 40, left: 60 };
+    margin = { top: 10, right: 10, bottom: 40, left: 150 };
     size;
     height;
     width;
