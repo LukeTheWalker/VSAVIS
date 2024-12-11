@@ -26,6 +26,8 @@ const defaultParams = {
  */
 export const getB2BHistoData = createAsyncThunk('b2bHistoSlice/getB2BHistData', async (args, thunkAPI) => {
 
+    if (args === undefined) args = {};
+
     const fir_param = args.fir === undefined ? defaultParams.fir : args.fir;
     const ids_param = args.ids === undefined ? defaultParams.ids : args.ids;
     const bins_param = args.bins === undefined ? defaultParams.bins : args.bins;
@@ -36,13 +38,13 @@ export const getB2BHistoData = createAsyncThunk('b2bHistoSlice/getB2BHistData', 
         bins: bins_param
     })  
 
-    console.log("Query parameters: ", queryParameters);
-    console.log("Query string: ", queryParameters.toString());
+    // console.log("Query parameters: ", queryParameters);
+    // console.log("Query string: ", queryParameters.toString());
 
     const response = await fetch('http://localhost:5000/getB2BHistData?' + queryParameters.toString());
     const responseJson = await response.json();
 
-    console.log("Response JSON: ", responseJson);
+    // console.log("Response JSON: ", responseJson);
     return responseJson;
 });
 
@@ -55,7 +57,7 @@ export const b2bHistoSlice = createSlice({
         builder => {
             builder.addCase(getB2BHistoData.fulfilled, (state, action) => {
                 state.data = action.payload; // Store fetched data as an array
-                console.log("Loading HISTO data with params");
+                // console.log("Loading HISTO data with params");
             });
         }
 });

@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setResized } from './redux/GlobalSlice';
 import HeatMapContainer from './components/HeatMap/HeatMapContainer';
 import TimeSeriesContainer from './components/TimeSeries/TimeSeriesContainer';
+import B2BHistoContainer from './components/B2BHisto/B2BHistoContainer';
 
 function App() {
     const dispatch = useDispatch();
@@ -26,6 +27,7 @@ function App() {
         <div className="App">
             <HeatMapContainer />
             <TimeSeriesContainer />
+            <B2BHistoContainer />
         </div>
     );
 }

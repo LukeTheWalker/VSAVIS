@@ -28,7 +28,7 @@ class HeatMapD3 {
     };
 
     renderHeatMap = function (visData) {
-        if (visData == undefined || visData.content.length === 0) return;
+        if (visData === undefined || visData.content.length === 0) return;
 
         const sources = visData.sources;
         const destinations = visData.destination;
@@ -39,10 +39,6 @@ class HeatMapD3 {
 
         // Define a color scale
         this.colorScale = d3.scaleSequential(d3.interpolateYlGnBu).domain([0, maxValue]);
-
-        console.log("visData", visData);
-        console.log("sources", sources);
-        console.log("destinations", destinations);
 
         const xScale = d3.scaleBand()
             .domain(sources)
@@ -65,7 +61,7 @@ class HeatMapD3 {
             .call(d3.axisLeft(yScale));
 
         // Draw heatmap cells
-        const heatmapCells = this.svgG.selectAll(".heatmap-cell")
+        this.svgG.selectAll(".heatmap-cell")
         .data(content)
         .join(
             enter => {

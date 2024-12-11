@@ -4,7 +4,6 @@ import { useSelector, useDispatch } from 'react-redux'
 
 import HeatMapD3 from './HeatMap-d3'
 import { getHeatMapData } from '../../redux/HeatMapSlice';
-import { use } from 'react';
 
 function HeatMapContainer() {
     const data = useSelector(state => state.heatmap.data)
@@ -28,7 +27,7 @@ function HeatMapContainer() {
 
     useEffect(() => 
         { dispatch(getHeatMapData()); }
-    , []);
+    , [dispatch]);
 
     // did mount called once the component did mount
     useEffect(() => {

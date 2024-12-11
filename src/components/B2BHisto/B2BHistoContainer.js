@@ -1,53 +1,54 @@
 import './B2BHisto.css'
 import { useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux'
+import { getB2BHistoData } from '../../redux/B2BHistoSlice'
 
 import B2BHistoD3 from './B2BHisto-d3'
 
 function B2BHistoContainer() {
-    // const data = useSelector(state => state.dataSet.data)
-    const data = null;
+    const data = useSelector(state => state.b2bhist.data)
     const resized = useSelector(state => state.global.resized);
     const dispatch = useDispatch();
 
     const divB2BHistoContainerRef  = useRef(null);
-    const timeSerieD3Ref = useRef(null)
+    const b2BHistoD3Ref = useRef(null)
 
     const getCharSize = function () {
         let width;
         let height;
         if (divB2BHistoContainerRef.current !== undefined) {
-            width = divB2BHistoContainerRef.current.clientWidth
-            height = divB2BHistoContainerRef.current.clientHeight
-        }
-        if (width > height) {
-            width = height;
-        } else {
-            height = width;
+            width=divB2BHistoContainerRef.current.offsetWidth;
+            height= 1000;
         }
         return { width: width, height: height };
     }
 
+    useEffect(() => 
+        { dispatch(getB2BHistoData({bins: 250})); }
+    , [dispatch]);
+
+
     // did mount called once the component did mount
     useEffect(() => {
         console.log("B2BHistoContainer useEffect for mounting");
-        const timeSerieD3 = new B2BHistoD3(divB2BHistoContainerRef.current);
-        timeSerieD3.create({ size: getCharSize() });
-        timeSerieD3Ref.current = timeSerieD3;
+        const b2BHistoD3 = new B2BHistoD3(divB2BHistoContainerRef.current);
+        b2BHistoD3.create({ size: getCharSize() });
+        b2BHistoD3Ref.current = b2BHistoD3;
         return () => {
             // did unmout, the return function is called once the component did unmount (removed for the screen)
             console.log("B2BHistoContainer useEffect [] return function, called when the component did unmount...");
-            const timeSerieD3 = timeSerieD3Ref.current;
-            timeSerieD3.clear()
+            const b2BHistoD3 = b2BHistoD3Ref.current;
+            b2BHistoD3.clear()
         }
     }, [resized]);// if empty array, useEffect is called after the component did mount (has been created)
 
     // did update, called each time dependencies change, dispatch remain stable over component cycles
     useEffect(() => {
         console.log("B2BHistoContainer useEffect with dependency [data, dispatch], called each time matrixData changes...");
-        const timeSerieD3 = timeSerieD3Ref.current;
+        const b2BHistoD3 = b2BHistoD3Ref.current;
 
-        timeSerieD3.renderB2BHisto(data);
+        console.log(data);
+        b2BHistoD3.renderB2BHisto(data);
     }, [data, resized, dispatch]);// if dependencies, useEffect is called after each data update, in our case only matrixData changes.
 
     return (
