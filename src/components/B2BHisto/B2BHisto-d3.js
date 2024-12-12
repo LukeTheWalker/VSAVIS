@@ -47,11 +47,18 @@ class B2BHistoD3 {
     }
 
     setupScales = function(data) {
-        // X scale
-        this.xScale = d3.scaleBand()
-            .domain(data.times)
-            .range([0, this.width])
-            .padding(0.2);
+        // Convert times to Date objects if they aren't already
+        const parsedTimes = data.times.map(time => 
+            time instanceof Date ? time : new Date(time)
+        );
+
+        // X scale with time - precise minute-level scaling
+        this.xScale = d3.scaleTime()
+            .domain([
+                d3.min(parsedTimes), 
+                d3.max(parsedTimes)
+            ])
+            .range([0, this.width]);
 
         // Find max values for top and bottom
         this.maxValueTop = d3.max(data.content.map(d => d3.sum(d.top)));
@@ -67,10 +74,12 @@ class B2BHistoD3 {
             .domain(data.classifications.top)
             .range(d3.schemeCategory10);
 
-
         this.colorBottom = d3.scaleOrdinal()
             .domain(data.classifications.bottom)
             .range(d3.schemeCategory10);
+
+        // Store parsed times for potential reuse
+        this.parsedTimes = parsedTimes;
 
         // Store data for potential updates
         this.data = data;
@@ -137,15 +146,7 @@ class B2BHistoD3 {
         // Setup scales based on data
         this.setupScales(data);
 
-        console.log("data", data);
-
-        // normalize data
-        // this.data.content.forEach(d => {
-        //     d.top = d.top.map(v => v / this.maxValueTop);
-        //     d.bottom = d.bottom.map(v => v / this.maxValueBottom);
-        // });
-
-        // do as above but map content on a new object
+        // Normalize data
         const normalized_data = data.content.map(d => {
             return {
                 top: d.top.map(v => v / this.maxValueTop),
@@ -174,10 +175,10 @@ class B2BHistoD3 {
             .data(d => d)
             .join("rect")
             .attr("class", "top-bar")
-            .attr("x", (d, i) => this.xScale(data.times[i]))
+            .attr("x", (d, i) => this.xScale(this.parsedTimes[i]))
             .attr("y", d => this.yScale(d[1]))
             .attr("height", d => this.yScale(d[0]) - this.yScale(d[1]))
-            .attr("width", this.xScale.bandwidth());
+            .attr("width", this.width / this.parsedTimes.length);
 
         // Render bottom bars with join
         const bottomBars = this.bottomBarsG.selectAll(".bottom-bar-group")
@@ -190,28 +191,49 @@ class B2BHistoD3 {
             .data(d => d)
             .join("rect")
             .attr("class", "bottom-bar")
-            .attr("x", (d, i) => this.xScale(data.times[i]))
+            .attr("x", (d, i) => this.xScale(this.parsedTimes[i]))
             .attr("y", d => this.yScale(d[0]))
             .attr("height", d => this.yScale(d[1]) - this.yScale(d[0]))
-            .attr("width", this.xScale.bandwidth());
+            .attr("width", this.width / this.parsedTimes.length);
 
-        // X axis
-        // Compute tick values to limit to 25 equally spaced ticks
-        const times = this.data.times;
-        const tickNumber = 25;
-        const interval = Math.max(1, Math.floor(times.length / tickNumber));
-        const tickValues = times.filter((d, i) => i % interval === 0);
+        // X axis with time formatting
+        const timeFormatHourMin = d3.timeFormat("%b %d %H:%M");
+
+        // Create time ticks - show ticks every 4 hours
+        const timeAxis = d3.axisBottom(this.xScale)
+            .ticks(d3.timeHour.every(4))
+            .tickFormat(timeFormatHourMin);
 
         this.xAxisG
             .attr("transform", `translate(0,${this.yScale(0)})`)
-            .call(d3.axisBottom(this.xScale).tickValues(tickValues))
+            .call(timeAxis)
             .selectAll("text")
+            .style("text-anchor", "start");
+
+        // Add white rectangle behind x-axis ticks for readability
+        this.xAxisG.selectAll(".tick")
+            .each(function() {
+            const bbox = this.getBBox();
+            d3.select(this)
+                .insert("rect", ":first-child")
+                .attr("x", bbox.x - 2)
+                .attr("y", bbox.y + 5)
+                .attr("width", bbox.width + 4)
+                .attr("height", bbox.height - 5)
+                .attr("fill", "white")
+                .attr("rx", 5) // Rounded corners
+                .attr("ry", 5) // Rounded corners
+                .attr("opacity", 0.8); // Opacity
+            });
+
+        // Rotate x-axis ticks
+        this.xAxisG.selectAll(".tick text")
             .attr("transform", "rotate(45)")
             .style("text-anchor", "start");
 
-        console.log("this.yScale", this.yScale);
-        console.log("this.maxValueTop", this.maxValueTop);
-        console.log("this.maxValueBottom", this.maxValueBottom);
+        // Rotate the white rectangle behind x-axis ticks
+        this.xAxisG.selectAll(".tick rect")
+            .attr("transform", "rotate(45)");
 
         // Y axis
         this.yAxisG

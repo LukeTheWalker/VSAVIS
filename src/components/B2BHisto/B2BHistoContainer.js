@@ -24,7 +24,7 @@ function B2BHistoContainer() {
     }
 
     useEffect(() => 
-        { dispatch(getB2BHistoData({bins: 250})); }
+        { dispatch(getB2BHistoData({mode: "count", bins:500})); }
     , [dispatch]);
 
 
@@ -47,7 +47,6 @@ function B2BHistoContainer() {
         console.log("B2BHistoContainer useEffect with dependency [data, dispatch], called each time matrixData changes...");
         const b2BHistoD3 = b2BHistoD3Ref.current;
 
-        console.log(data);
         b2BHistoD3.renderB2BHisto(data);
     }, [data, resized, dispatch]);// if dependencies, useEffect is called after each data update, in our case only matrixData changes.
 
