@@ -11,7 +11,7 @@ const defaultParams = {
     fir: "Syslog priority",
     ids: "classification",
     bins: 100,
-    log: 0
+    mode: 'count'
 };
 
 /**
@@ -23,7 +23,7 @@ const defaultParams = {
  * @param {string} [args.fir] - The FIR parameter, defaults to "Syslog priority".
  * @param {string} [args.ids] - The IDS parameter, defaults to "classification".
  * @param {string} [args.bins] - The BINS parameter, defaults to 100.
- * @param {string} [args.log] - The LOG parameter, indicating whether firewall data will be dislayed in log scale
+ * @param {string} [args.mode] - The MODE parameter, indicating how to aggregate the data for the firewall, defaults to "count".
  * @returns {Promise<Object>} The response JSON containing the B2B histogram data.
  */
 export const getB2BHistoData = createAsyncThunk('b2bHistoSlice/getB2BHistData', async (args, thunkAPI) => {
@@ -33,13 +33,13 @@ export const getB2BHistoData = createAsyncThunk('b2bHistoSlice/getB2BHistData', 
     const fir_param = args.fir === undefined ? defaultParams.fir : args.fir;
     const ids_param = args.ids === undefined ? defaultParams.ids : args.ids;
     const bins_param = args.bins === undefined ? defaultParams.bins : args.bins;
-    const log_param = args.log === undefined ? defaultParams.log : args.log;
+    const mode_param = args.mode === undefined ? defaultParams.mode : args.mode;
 
     const queryParameters = new URLSearchParams({
         fir: fir_param,
         ids: ids_param,
         bins: bins_param,
-        log: log_param
+        mode: mode_param
     })  
 
     // console.log("Query parameters: ", queryParameters);
