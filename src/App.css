@@ -19,3 +19,71 @@
 text {
     font-family: 'Roboto', sans-serif;
 }
+
+/* Container to add spacing between dropdowns */
+.dropdown-container {
+    display: flex;
+    flex-direction: row;
+    gap: 40px; /* Increased gap between dropdown pairs */
+    justify-content: center; /* Centers the dropdown container */
+    max-width: 800px; /* Increases the width of the container */
+    margin: 0 auto; /* Center the container horizontally */
+  }
+  
+  /* Style for labels */
+  .dropdown-label {
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 4px;
+  }
+  
+  /* Style for the select dropdowns */
+  .dropdown-select {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    font-weight: 400;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    background-color: #fafafa;
+    color: #333;
+    appearance: none; /* Removes default arrow styling */
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Custom arrow icon for dropdown */
+  .dropdown-select::after {
+    content: "▼";
+    position: absolute;
+    right: 10px;
+    color: #888;
+  }
+  
+  /* Hover effect */
+  .dropdown-select:hover {
+    border-color: #aaa;
+    background-color: #f3f3f3;
+  }
+  
+  /* Focus effect */
+  .dropdown-select:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.25);
+  }
+  
+  /* Dropdown pair adjustments */
+  .dropdown-pair {
+    display: inline-flex;
+    flex-direction: column; /* Keeps label and select vertically aligned */
+    align-items: flex-start; /* Aligns label with the dropdown */
+    min-width: 200px; /* Ensures enough width for each dropdown */
+  }
+  
+  /* Optional: Adds more spacing to the individual dropdown pairs */
+  .dropdown-container .dropdown-pair {
+    margin-top: 20px;
+  }

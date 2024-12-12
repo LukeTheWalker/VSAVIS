@@ -17,6 +17,7 @@ class B2BHistoD3 {
 
     create = function (config) {
         this.size = {width: config.size.width, height: config.size.height};
+        this.rect = true;
 
         this.width = this.size.width - this.margin.left - this.margin.right;
         this.height = this.size.height - this.margin.top - this.margin.bottom;
@@ -197,43 +198,48 @@ class B2BHistoD3 {
             .attr("width", this.width / this.parsedTimes.length);
 
         // X axis with time formatting
-        const timeFormatHourMin = d3.timeFormat("%b %d %H:%M");
+        if(this.rect===true)
+        {
+            const timeFormatHourMin = d3.timeFormat("%b %d %H:%M");
 
-        // Create time ticks - show ticks every 4 hours
-        const timeAxis = d3.axisBottom(this.xScale)
-            .ticks(d3.timeHour.every(4))
-            .tickFormat(timeFormatHourMin);
+            // Create time ticks - show ticks every 4 hours
+            const timeAxis = d3.axisBottom(this.xScale)
+                .ticks(d3.timeHour.every(4))
+                .tickFormat(timeFormatHourMin);
 
-        this.xAxisG
-            .attr("transform", `translate(0,${this.yScale(0)})`)
-            .call(timeAxis)
-            .selectAll("text")
-            .style("text-anchor", "start");
+            this.xAxisG
+                .attr("transform", `translate(0,${this.yScale(0)})`)
+                .call(timeAxis)
+                .selectAll("text")
+                .style("text-anchor", "start");
 
-        // Add white rectangle behind x-axis ticks for readability
-        this.xAxisG.selectAll(".tick")
-            .each(function() {
-            const bbox = this.getBBox();
-            d3.select(this)
-                .insert("rect", ":first-child")
-                .attr("x", bbox.x - 2)
-                .attr("y", bbox.y + 5)
-                .attr("width", bbox.width + 4)
-                .attr("height", bbox.height - 5)
-                .attr("fill", "white")
-                .attr("rx", 5) // Rounded corners
-                .attr("ry", 5) // Rounded corners
-                .attr("opacity", 0.8); // Opacity
-            });
+            // Add white rectangle behind x-axis ticks for readability
+            this.xAxisG.selectAll(".tick")
+                .each(function() {
+                const bbox = this.getBBox();
+                d3.select(this)
+                    .insert("rect", ":first-child")
+                    .attr("x", bbox.x - 2)
+                    .attr("y", bbox.y + 5)
+                    .attr("width", bbox.width + 4)
+                    .attr("height", bbox.height - 5)
+                    .attr("fill", "white")
+                    .attr("rx", 5) // Rounded corners
+                    .attr("ry", 5) // Rounded corners
+                    .attr("opacity", 0.8); // Opacity
+                });
 
-        // Rotate x-axis ticks
-        this.xAxisG.selectAll(".tick text")
-            .attr("transform", "rotate(45)")
-            .style("text-anchor", "start");
+            // Rotate x-axis ticks
+            this.xAxisG.selectAll(".tick text")
+                .attr("transform", "rotate(45)")
+                .style("text-anchor", "start");
 
-        // Rotate the white rectangle behind x-axis ticks
-        this.xAxisG.selectAll(".tick rect")
-            .attr("transform", "rotate(45)");
+            // Rotate the white rectangle behind x-axis ticks
+            this.xAxisG.selectAll(".tick rect")
+                .attr("transform", "rotate(45)");
+
+            this.rect=false;
+        }
 
         // Y axis
         this.yAxisG
