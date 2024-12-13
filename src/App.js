@@ -30,13 +30,16 @@ function App() {
         return () => window.removeEventListener("resize", handleResize);
     }, [dispatch]); // Include dispatch in the dependency array
 
+    const selectedValueIDS = useSelector(state => state.selection.dropdownIDS);
+    const selectedValueFirewall = useSelector(state => state.selection.dropdownFirewall);
+
     return (
         <div className="App">
             <HeatMapContainer />
             <TimeSeriesContainer />
             <div className="dropdown-pair">
                 <label htmlFor="dropdownIDS" className="dropdown-label">Choose an attribute for the IDS:</label>
-                <select id="dropdownIDS" className="dropdown-select" onChange={(e) => handleChange('dropdownIDS', e)} defaultValue="classification">
+                <select id="dropdownIDS" className="dropdown-select" onChange={(e) => handleChange('dropdownIDS', e)} defaultValue={selectedValueIDS}>
                     <option value="time">Time</option>
                     <option value="sourceIP">Source IP</option>
                     <option value="sourcePort">Source Port</option>
@@ -49,7 +52,7 @@ function App() {
             </div>
             <div className="dropdown-pair">
                 <label htmlFor="dropdownIDS" className="dropdown-label">Choose an attribute for the Firewall:</label>
-                <select id="dropdownFirewall" className="dropdown-select" onChange={(e) => handleChange('dropdownFirewall', e)} defaultValue="Syslog priority">
+                <select id="dropdownFirewall" className="dropdown-select" onChange={(e) => handleChange('dropdownFirewall', e)} defaultValue={selectedValueFirewall}>
                     <option value="Syslog priority">Syslog priority</option>
                     <option value="Operation">Operation</option>
                     <option value="Source IP">Source IP</option>
