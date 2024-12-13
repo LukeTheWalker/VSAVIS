@@ -1,3 +1,3 @@
-const server = 'https://3b96-2001-a18-a-a016-266e-96ff-fe3a-8c0e.ngrok-free.app';
+const server = 'https://13fd-2001-a18-a-a021-d34f-556d-6a7a-c11.ngrok-free.app/';
 
 export default server;

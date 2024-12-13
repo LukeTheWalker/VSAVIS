@@ -11,6 +11,9 @@ function B2BHistoContainer() {
     const resized = useSelector(state => state.global.resized);
     const selectedValueIDS = useSelector(state => state.selection.dropdownIDS);
     const selectedValueFirewall = useSelector(state => state.selection.dropdownFirewall);
+    const selectedValueModeFIR = useSelector(state => state.selection.dropdownModeFIR);
+    const selectedValueNumBins = useSelector(state => state.selection.numBins);
+    
     console.log("selectedValueIDS", selectedValueIDS);  
     const dispatch = useDispatch();
 
@@ -55,8 +58,8 @@ function B2BHistoContainer() {
 
     // did update, called each time dependencies change, dispatch remain stable over component cycles
     useEffect(() => {
-        dispatch(getB2BHistoData({fir: selectedValueFirewall,ids: selectedValueIDS, mode: "count", bins:500}));
-    }, [selectedValueIDS, selectedValueFirewall, dispatch]);// if dependencies, useEffect is called after each data update, in our case only matrixData changes.
+        dispatch(getB2BHistoData({fir: selectedValueFirewall,ids: selectedValueIDS, mode: selectedValueModeFIR, bins:selectedValueNumBins}));
+    }, [selectedValueIDS, selectedValueFirewall, selectedValueModeFIR, selectedValueNumBins, dispatch]);// if dependencies, useEffect is called after each data update, in our case only matrixData changes.
 
 
     return (

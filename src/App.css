@@ -1,89 +1,114 @@
+/* General App container styling */
 .App {
-    text-align: center;
-    height: 100%;
-    padding: 20px;
-    box-sizing: border-box;
-    justify-content: center;
+  text-align: center;
+  font-family: 'Roboto', sans-serif;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
-.row:after {
-    content: "";
-    display: table;
-    clear: both;
-}
-.col2{
-    float: left;
-    width: 50%;
-}
-
-text {
-    font-family: 'Roboto', sans-serif;
+/* Dropdown and input container as a grid */
+.dropdown-grid {
+  display: grid;
+  grid-template-areas: 
+    "firewall-mode IDS"
+    "bins bins";
+  grid-gap: 20px;
+  justify-content: center;
+  margin: 40px 0;
 }
 
-/* Container to add spacing between dropdowns */
-.dropdown-container {
-    display: flex;
-    flex-direction: row;
-    gap: 40px; /* Increased gap between dropdown pairs */
-    justify-content: center; /* Centers the dropdown container */
-    max-width: 800px; /* Increases the width of the container */
-    margin: 0 auto; /* Center the container horizontally */
+.grid-item {
+  padding: 10px;
+}
+
+.firewall-mode {
+  grid-area: firewall-mode;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.ids {
+  grid-area: IDS;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.bins {
+  grid-area: bins;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/* Labels */
+.dropdown-label {
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+/* Dropdowns and input fields */
+.dropdown-select, .input-field {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: 400;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  background-color: #fff;
+  color: #333;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+
+/* Hover and focus effects */
+.dropdown-select:hover, .input-field:hover {
+  border-color: #aaa;
+  background-color: #f9f9f9;
+}
+
+.dropdown-select:focus, .input-field:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 8px rgba(0, 123, 255, 0.25);
+}
+
+/* Style for submit button */
+.btn-submit {
+  margin-top: 10px;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #fff;
+  background-color: #007bff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.btn-submit:hover {
+  background-color: #0056b3;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-submit:focus {
+  outline: none;
+  box-shadow: 0 0 8px rgba(0, 123, 255, 0.25);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .dropdown-grid {
+    grid-template-areas: 
+      "firewall-mode"
+      "IDS"
+      "bins";
   }
-  
-  /* Style for labels */
-  .dropdown-label {
-    font-size: 16px;
-    font-weight: 500;
-    color: #333;
-    margin-bottom: 4px;
+  .dropdown-container {
+    flex-direction: column;
   }
-  
-  /* Style for the select dropdowns */
-  .dropdown-select {
-    width: 100%;
-    padding: 10px;
-    font-size: 16px;
-    font-weight: 400;
-    border: 2px solid #ddd;
-    border-radius: 8px;
-    background-color: #fafafa;
-    color: #333;
-    appearance: none; /* Removes default arrow styling */
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-  
-  /* Custom arrow icon for dropdown */
-  .dropdown-select::after {
-    content: "▼";
-    position: absolute;
-    right: 10px;
-    color: #888;
-  }
-  
-  /* Hover effect */
-  .dropdown-select:hover {
-    border-color: #aaa;
-    background-color: #f3f3f3;
-  }
-  
-  /* Focus effect */
-  .dropdown-select:focus {
-    outline: none;
-    border-color: #007bff;
-    box-shadow: 0 0 8px rgba(0, 123, 255, 0.25);
-  }
-  
-  /* Dropdown pair adjustments */
-  .dropdown-pair {
-    display: inline-flex;
-    flex-direction: column; /* Keeps label and select vertically aligned */
-    align-items: flex-start; /* Aligns label with the dropdown */
-    min-width: 200px; /* Ensures enough width for each dropdown */
-  }
-  
-  /* Optional: Adds more spacing to the individual dropdown pairs */
-  .dropdown-container .dropdown-pair {
-    margin-top: 20px;
-  }
+}

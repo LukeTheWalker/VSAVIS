@@ -6,7 +6,9 @@ export const selectionSlice = createSlice({
 
   initialState: {
     dropdownIDS: "classification",
-    dropdownFirewall: "Syslog priority"
+    dropdownFirewall: "Syslog priority",
+    dropdownModeFIR: "count",
+    numBins: 500
   },
   
   reducers: {
