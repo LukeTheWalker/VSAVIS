@@ -210,74 +210,95 @@ class B2BHistoD3 {
         this.setupScales(data);
 
         // Normalize data
-        const normalized_data = data.content.map(d => {
-            return {
-                top: d.top.map(v => v / this.maxValueTop),
-                bottom: d.bottom.map(v => v / this.maxValueBottom)
-            }
-        });
+        const normalized_data = data.content.map(d => ({
+            top: d.top.map(v => v / this.maxValueTop),
+            bottom: d.bottom.map(v => v / this.maxValueBottom)
+        }));
 
         // Prepare stacked data
-        const stackTop = d3.stack()
-            .keys(d3.range(data.classifications.top.length));
-
-        const stackBottom = d3.stack()
-            .keys(d3.range(data.classifications.bottom.length));
+        const stackTop = d3.stack().keys(d3.range(data.classifications.top.length));
+        const stackBottom = d3.stack().keys(d3.range(data.classifications.bottom.length));
 
         const topStackedData = stackTop(normalized_data.map(d => d.top));
-        const bottomStackedData = stackBottom(normalized_data.map(d => d.bottom.map(v => -v))); // Negate for flipping
+        const bottomStackedData = stackBottom(normalized_data.map(d => d.bottom.map(v => -v)));
 
-        // Render top bars with join
+        // Render top bars with explicit join pattern
         const topBars = this.topBarsG.selectAll(".top-bar-group")
             .data(topStackedData)
-            .join("g")
-            .attr("class", "top-bar-group")
-            .attr("fill", (d, i) => this.colorTop(data.classifications.top[i]));
+            .join(
+                enter => enter.append("g")
+                    .attr("class", "top-bar-group")
+                    .attr("fill", (d, i) => this.colorTop(data.classifications.top[i])),
+                update => update
+                    .attr("fill", (d, i) => this.colorTop(data.classifications.top[i])),
+                exit => exit.remove()
+            );
 
         topBars.selectAll(".top-bar")
             .data(d => d)
-            .join("rect")
-            .attr("class", "top-bar")
-            .attr("x", (d, i) => this.xScale(this.parsedTimes[i]))
-            .attr("y", d => this.yScale(d[1]))
-            .attr("height", d => this.yScale(d[0]) - this.yScale(d[1]))
-            .attr("width", this.width / this.parsedTimes.length);
+            .join(
+                enter => enter.append("rect")
+                    .attr("class", "top-bar")
+                    .attr("x", (d, i) => this.xScale(this.parsedTimes[i]))
+                    .attr("y", d => this.yScale(d[1]))
+                    .attr("height", d => this.yScale(d[0]) - this.yScale(d[1]))
+                    .attr("width", this.width / this.parsedTimes.length),
+                update => update
+                    .attr("x", (d, i) => this.xScale(this.parsedTimes[i]))
+                    .attr("y", d => this.yScale(d[1]))
+                    .attr("height", d => this.yScale(d[0]) - this.yScale(d[1]))
+                    .attr("width", this.width / this.parsedTimes.length),
+                exit => exit.remove()
+            );
 
-        // Render bottom bars with join
+        // Render bottom bars with explicit join pattern
         const bottomBars = this.bottomBarsG.selectAll(".bottom-bar-group")
             .data(bottomStackedData)
-            .join("g")
-            .attr("class", "bottom-bar-group")
-            .attr("fill", (d, i) => this.colorBottom(data.classifications.bottom[i]));
+            .join(
+                enter => enter.append("g")
+                    .attr("class", "bottom-bar-group")
+                    .attr("fill", (d, i) => this.colorBottom(data.classifications.bottom[i])),
+                update => update
+                    .attr("fill", (d, i) => this.colorBottom(data.classifications.bottom[i])),
+                exit => exit.remove()
+            );
 
         bottomBars.selectAll(".bottom-bar")
             .data(d => d)
-            .join("rect")
-            .attr("class", "bottom-bar")
-            .attr("x", (d, i) => this.xScale(this.parsedTimes[i]))
-            .attr("y", d => this.yScale(d[0]))
-            .attr("height", d => this.yScale(d[1]) - this.yScale(d[0]))
-            .attr("width", this.width / this.parsedTimes.length);
+            .join(
+                enter => enter.append("rect")
+                    .attr("class", "bottom-bar")
+                    .attr("x", (d, i) => this.xScale(this.parsedTimes[i]))
+                    .attr("y", d => this.yScale(d[0]))
+                    .attr("height", d => this.yScale(d[1]) - this.yScale(d[0]))
+                    .attr("width", this.width / this.parsedTimes.length),
+                update => update
+                    .attr("x", (d, i) => this.xScale(this.parsedTimes[i]))
+                    .attr("y", d => this.yScale(d[0]))
+                    .attr("height", d => this.yScale(d[1]) - this.yScale(d[0]))
+                    .attr("width", this.width / this.parsedTimes.length),
+                exit => exit.remove()
+            );
 
-        // X axis with time formatting
-        if(this.rect===true)
-        {
-            const timeFormatHourMin = d3.timeFormat("%b %d %H:%M");
+        // Axes and legend code
+        const timeFormatHourMin = d3.timeFormat("%b %d %H:%M");
+        const timeAxis = d3.axisBottom(this.xScale)
+            .ticks(d3.timeHour.every(4))
+            .tickFormat(timeFormatHourMin);
 
-            // Create time ticks - show ticks every 4 hours
-            const timeAxis = d3.axisBottom(this.xScale)
-                .ticks(d3.timeHour.every(4))
-                .tickFormat(timeFormatHourMin);
+        // clear svg 
+        this.xAxisG.selectAll("*").remove();
+        this.yAxisG.selectAll("*").remove();
 
-            this.xAxisG
-                .attr("transform", `translate(0,${this.yScale(0)})`)
-                .call(timeAxis)
-                .selectAll("text")
-                .style("text-anchor", "start");
+        this.xAxisG
+            .attr("transform", `translate(0,${this.yScale(0)})`)
+            .call(timeAxis)
+            .selectAll("text")
+            .style("text-anchor", "start");
 
-            // Add white rectangle behind x-axis ticks for readability
-            this.xAxisG.selectAll(".tick")
-                .each(function() {
+        this.xAxisG.selectAll(".tick")
+            .each(function() {
+                // remove existing rect
                 const bbox = this.getBBox();
                 d3.select(this)
                     .insert("rect", ":first-child")
@@ -286,33 +307,26 @@ class B2BHistoD3 {
                     .attr("width", bbox.width + 4)
                     .attr("height", bbox.height - 5)
                     .attr("fill", "white")
-                    .attr("rx", 5) // Rounded corners
-                    .attr("ry", 5) // Rounded corners
-                    .attr("opacity", 0.8); // Opacity
-                });
+                    .attr("rx", 5)
+                    .attr("ry", 5)
+                    .attr("opacity", 0.8);
+            });
 
-            // Rotate x-axis ticks
-            this.xAxisG.selectAll(".tick text")
-                .attr("transform", "rotate(45)")
-                .style("text-anchor", "start");
+        this.xAxisG.selectAll(".tick text")
+            .attr("transform", "rotate(45)")
+            .style("text-anchor", "start");
 
-            // Rotate the white rectangle behind x-axis ticks
-            this.xAxisG.selectAll(".tick rect")
-                .attr("transform", "rotate(45)");
+        this.xAxisG.selectAll(".tick rect")
+            .attr("transform", "rotate(45)");
 
-            this.rect=false;
-        }
-
-        // Y axis
         this.yAxisG
             .call(d3.axisLeft(this.yScale)
-            .tickFormat(d => {
-                if (d <= 0) return Math.round(- d * this.maxValueBottom);
-                if (d >= 0) return Math.round(  d * this.maxValueTop);
-                return d;
-            }));
+                .tickFormat(d => {
+                    if (d <= 0) return Math.round(-d * this.maxValueBottom);
+                    if (d >= 0) return Math.round(d * this.maxValueTop);
+                    return d;
+                }));
 
-        // Render legend
         this.renderLegend(data.classifications);
 
         return this;
