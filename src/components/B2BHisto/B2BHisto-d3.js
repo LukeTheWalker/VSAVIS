@@ -150,10 +150,6 @@ class B2BHistoD3 {
             .attr("y", (d, i) => topOffsets[i][1] + 10)
             .text(d => d);
 
-        const bottomLegend = this.legendSvg.append("g")
-            .attr("class", "bottom-legend")
-            .attr("transform", `translate(0, ${this.height + 50})`);
-
         let bottomOffsets = [];
         currentX = 0;
         currentLine = 0;
@@ -172,6 +168,10 @@ class B2BHistoD3 {
             width: Math.max(...bottomOffsets.map(o => o[0])) + 150,
             height: (currentLine + 1) * lineHeight + 10
         };
+
+        const bottomLegend = this.legendSvg.append("g")
+            .attr("class", "bottom-legend")
+            .attr("transform", `translate(0, ${this.height - bottomBBox.height + 100})`);
 
         bottomLegend.insert("rect", ":first-child")
             .attr("width", bottomBBox.width)
@@ -237,17 +237,12 @@ class B2BHistoD3 {
         topBars.selectAll(".top-bar")
             .data(d => d)
             .join(
-                enter => enter.append("rect")
-                    .attr("class", "top-bar")
-                    .attr("x", (d, i) => this.xScale(this.parsedTimes[i]))
-                    .attr("y", d => this.yScale(d[1]))
-                    .attr("height", d => this.yScale(d[0]) - this.yScale(d[1]))
-                    .attr("width", this.width / this.parsedTimes.length),
-                update => update
-                    .attr("x", (d, i) => this.xScale(this.parsedTimes[i]))
-                    .attr("y", d => this.yScale(d[1]))
-                    .attr("height", d => this.yScale(d[0]) - this.yScale(d[1]))
-                    .attr("width", this.width / this.parsedTimes.length),
+                enter => {
+                    const s = enter.append("rect")
+                        .attr("class", "top-bar");
+                    this.updateSquareTop(s);
+                },
+                update => this.updateSquareTop(update),
                 exit => exit.remove()
             );
 
@@ -266,18 +261,13 @@ class B2BHistoD3 {
         bottomBars.selectAll(".bottom-bar")
             .data(d => d)
             .join(
-                enter => enter.append("rect")
-                    .attr("class", "bottom-bar")
-                    .attr("x", (d, i) => this.xScale(this.parsedTimes[i]))
-                    .attr("y", d => this.yScale(d[0]))
-                    .attr("height", d => this.yScale(d[1]) - this.yScale(d[0]))
-                    .attr("width", this.width / this.parsedTimes.length),
-                update => update
-                    .attr("x", (d, i) => this.xScale(this.parsedTimes[i]))
-                    .attr("y", d => this.yScale(d[0]))
-                    .attr("height", d => this.yScale(d[1]) - this.yScale(d[0]))
-                    .attr("width", this.width / this.parsedTimes.length),
-                exit => exit.remove()
+            enter => {
+                const s = enter.append("rect")
+                .attr("class", "bottom-bar");
+                this.updateSquareBottom(s);
+            },
+            update => this.updateSquareBottom(update),
+            exit => exit.remove()
             );
 
         // Axes and legend code
@@ -332,9 +322,21 @@ class B2BHistoD3 {
         return this;
     }
 
-    updateDots = function() { 
-        console.log("IMPLEMENT updateDots");
-        return this;
+    updateSquareTop = function(s) { 
+        // const square = s.select(".top-bar");
+        s.attr("x", (d, i) => this.xScale(this.parsedTimes[i]))
+            .attr("y", d => this.yScale(d[1]))
+            .attr("height", d => this.yScale(d[0]) - this.yScale(d[1]))
+            .attr("width", this.width / this.parsedTimes.length );
+        return s;
+    }
+
+    updateSquareBottom = function(s) {
+        s.attr("x", (d, i) => this.xScale(this.parsedTimes[i]))
+            .attr("y", d => this.yScale(d[0]))
+            .attr("height", d => this.yScale(d[1]) - this.yScale(d[0]))
+            .attr("width", this.width / this.parsedTimes.length );
+        return s;
     }
 
     clear = function(){
