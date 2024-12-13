@@ -30,9 +30,9 @@ function B2BHistoContainer() {
         return { width: width, height: height };
     }
 
-    useEffect(() => 
-        { dispatch(getB2BHistoData({mode: "count", bins:500})); }
-    , [dispatch]);
+    // useEffect(() => 
+    //     { dispatch(getB2BHistoData({mode: "count", bins:5})); }
+    // , [dispatch]);
 
     // did mount called once the component did mount
     useEffect(() => {

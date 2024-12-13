@@ -80,7 +80,7 @@ class B2BHistoD3 {
             .range(d3.schemeCategory10);
 
         // Store parsed times for potential reuse
-        this.parsedTimes = parsedTimes;
+        this.parsedTimes = parsedTimes.slice(0, -1);
 
         // Store data for potential updates
         this.data = data;
@@ -323,19 +323,20 @@ class B2BHistoD3 {
     }
 
     updateSquareTop = function(s) { 
-        // const square = s.select(".top-bar");
+        const square_width = Math.floor(this.width / this.parsedTimes.length);
         s.attr("x", (d, i) => this.xScale(this.parsedTimes[i]))
             .attr("y", d => this.yScale(d[1]))
             .attr("height", d => this.yScale(d[0]) - this.yScale(d[1]))
-            .attr("width", this.width / this.parsedTimes.length );
+            .attr("width", square_width);
         return s;
     }
 
     updateSquareBottom = function(s) {
+        const square_width = Math.floor(this.width / this.parsedTimes.length);
         s.attr("x", (d, i) => this.xScale(this.parsedTimes[i]))
             .attr("y", d => this.yScale(d[0]))
             .attr("height", d => this.yScale(d[1]) - this.yScale(d[0]))
-            .attr("width", this.width / this.parsedTimes.length );
+            .attr("width", square_width);
         return s;
     }
 
