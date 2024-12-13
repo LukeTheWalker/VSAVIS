@@ -28,7 +28,7 @@ class B2BHistoD3 {
             .attr("height", this.height + this.margin.top + this.margin.bottom);
 
         this.legendSvg = this.svg.append("g")
-            .attr("transform", `translate(${this.width - 200}, 0)`);
+            .attr("transform", `translate(${100}, 0)`);
 
         this.svgG = this.svg.append("g")
             .attr("class","svgG")
@@ -89,19 +89,54 @@ class B2BHistoD3 {
     }
 
     renderLegend = function(classifications) {
-        // Clear any existing legend
-        this.legendSvg.selectAll("*").remove();
+        // Remove existing legend
+        this.legendSvg.remove();
+        
+        // Recreate legend group as the last child of SVG to ensure it's on top
+        this.legendSvg = this.svg.append("g")
+            .attr("transform", `translate(${100}, 0)`)
+            .attr("class", "legend-group");
 
-        // Top legend
+        // Rest of the code remains the same
+        const lineHeight = 25;
+
         const topLegend = this.legendSvg.append("g")
             .attr("class", "top-legend")
             .attr("transform", "translate(0, 20)");
+
+        let topOffsets = [];
+        let currentX = 0;
+        let currentLine = 0;
+
+        classifications.top.forEach((d, i) => {
+            const textWidth = d.length * 8 + 30;
+            if (currentX + textWidth > this.width) {
+                currentX = 0;
+                currentLine++;
+            }
+            topOffsets.push([currentX, currentLine * lineHeight]);
+            currentX += textWidth;
+        });
+
+        const topBBox = {
+            width: Math.max(...topOffsets.map(o => o[0])) + 150,
+            height: (currentLine + 1) * lineHeight + 10
+        };
+        
+        topLegend.insert("rect", ":first-child")
+            .attr("width", topBBox.width)
+            .attr("height", topBBox.height)
+            .attr("fill", "white")
+            .attr("rx", 5)
+            .attr("ry", 5)
+            .attr("opacity", 0.8)
+            .attr("transform", "translate(0, -13)");
 
         topLegend.selectAll(".top-legend-item")
             .data(classifications.top)
             .join("g")
             .attr("class", "top-legend-item")
-            .attr("transform", (d, i) => `translate(0, ${i * 20})`)
+            .attr("transform", (d, i) => `translate(${topOffsets[i][0]}, ${topOffsets[i][1]})`)
             .call(g => g.append("rect")
                 .attr("width", 10)
                 .attr("height", 10)
@@ -111,20 +146,47 @@ class B2BHistoD3 {
             .data(classifications.top)
             .join("text")
             .attr("class", "top-legend-text")
-            .attr("x", 20)
-            .attr("y", (d, i) => i * 20 + 10)
+            .attr("x", (d, i) => topOffsets[i][0] + 15)
+            .attr("y", (d, i) => topOffsets[i][1] + 10)
             .text(d => d);
 
-        // Bottom legend
         const bottomLegend = this.legendSvg.append("g")
             .attr("class", "bottom-legend")
-            .attr("transform", "translate(0, 800)");
+            .attr("transform", `translate(0, ${this.height + 50})`);
+
+        let bottomOffsets = [];
+        currentX = 0;
+        currentLine = 0;
+
+        classifications.bottom.forEach((d, i) => {
+            const textWidth = d.length * 8 + 30;
+            if (currentX + textWidth > this.width) {
+                currentX = 0;
+                currentLine++;
+            }
+            bottomOffsets.push([currentX, currentLine * lineHeight]);
+            currentX += textWidth;
+        });
+
+        const bottomBBox = {
+            width: Math.max(...bottomOffsets.map(o => o[0])) + 150,
+            height: (currentLine + 1) * lineHeight + 10
+        };
+
+        bottomLegend.insert("rect", ":first-child")
+            .attr("width", bottomBBox.width)
+            .attr("height", bottomBBox.height)
+            .attr("fill", "white")
+            .attr("rx", 5)
+            .attr("ry", 5)
+            .attr("opacity", 0.8)
+            .attr("transform", "translate(0, -13)");
 
         bottomLegend.selectAll(".bottom-legend-item")
             .data(classifications.bottom)
             .join("g")
             .attr("class", "bottom-legend-item")
-            .attr("transform", (d, i) => `translate(0, ${i * 20})`)
+            .attr("transform", (d, i) => `translate(${bottomOffsets[i][0]}, ${bottomOffsets[i][1]})`)
             .call(g => g.append("rect")
                 .attr("width", 10)
                 .attr("height", 10)
@@ -134,8 +196,8 @@ class B2BHistoD3 {
             .data(classifications.bottom)
             .join("text")
             .attr("class", "bottom-legend-text")
-            .attr("x", 20)
-            .attr("y", (d, i) => i * 20 + 10)
+            .attr("x", (d, i) => bottomOffsets[i][0] + 15)
+            .attr("y", (d, i) => bottomOffsets[i][1] + 10)
             .text(d => d);
 
         return this;
