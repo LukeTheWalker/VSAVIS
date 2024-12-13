@@ -108,8 +108,10 @@ class B2BHistoD3 {
         let currentX = 0;
         let currentLine = 0;
 
+        console.log("classifications top ", classifications.top);
+
         classifications.top.forEach((d, i) => {
-            const textWidth = d.length * 8 + 30;
+            const textWidth = String(d).length * 8 + 30;
             if (currentX + textWidth > this.width) {
                 currentX = 0;
                 currentLine++;
@@ -118,11 +120,15 @@ class B2BHistoD3 {
             currentX += textWidth;
         });
 
+        console.log("topOffsets", topOffsets);
+
         const topBBox = {
             width: Math.max(...topOffsets.map(o => o[0])) + 150,
             height: (currentLine + 1) * lineHeight + 10
         };
         
+        console.log("topBBox", topBBox);
+
         topLegend.insert("rect", ":first-child")
             .attr("width", topBBox.width)
             .attr("height", topBBox.height)
