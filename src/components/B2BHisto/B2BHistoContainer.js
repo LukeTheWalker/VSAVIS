@@ -61,7 +61,7 @@ function B2BHistoContainer() {
 
     return (
         <div style={{ width: "100%", height: "100%", padding: "2px 10px 10px 10px", display: "flex", flexDirection: "column", alignItems: "center" }}>
-            <div ref={divB2BHistoContainerRef} className="timeSerieDivContainer" style={{ width: "100%", height: "100%" }}> </div>
+            <div ref={divB2BHistoContainerRef} className="B2BHistoDivContainer" style={{ width: "100%", height: "100%" }}> </div>
         </div>
     )
 }
