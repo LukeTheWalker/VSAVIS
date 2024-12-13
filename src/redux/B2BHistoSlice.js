@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
+import server from './config';
 
 const initial_state = {
     "content": [],
@@ -45,7 +46,12 @@ export const getB2BHistoData = createAsyncThunk('b2bHistoSlice/getB2BHistData', 
     // console.log("Query parameters: ", queryParameters);
     // console.log("Query string: ", queryParameters.toString());
 
-    const response = await fetch('http://localhost:5000/getB2BHistData?' + queryParameters.toString());
+    // const response = await fetch('http://localhost:5000/getB2BHistData?' + queryParameters.toString());
+    const response = await fetch(server + '/getB2BHistData?' + queryParameters.toString(), {
+        headers: {
+            'ngrok-skip-browser-warning': 'true'
+        }
+    });
     const responseJson = await response.json();
 
     // console.log("Response JSON: ", responseJson);

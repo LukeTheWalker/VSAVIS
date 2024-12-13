@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
+import server from './config';
 
 const initial_state = {
     "content": [],
@@ -9,7 +10,12 @@ const initial_state = {
 // get the data in asyncThunk
 export const getHeatMapData = createAsyncThunk('heatMapData/fetchData', async (args, thunkAPI) => {
     // Simulate fetching data by using the fake_json
-    const response = await fetch('http://localhost:5000/getHeatMapData');
+    // const response = await fetch('http://localhost:5000/getHeatMapData');
+    const response = await fetch(server + '/getHeatMapData', {
+        headers: {
+            'ngrok-skip-browser-warning': 'true'
+        }
+    });
     const responseJson = await response.json();
     
     return responseJson;
