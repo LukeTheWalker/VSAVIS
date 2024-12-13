@@ -10,6 +10,7 @@ class B2BHistoD3 {
     yScale;
     color;
     data;
+    zoomEnabled = true;
 
     constructor(el){
         this.el = el;
@@ -44,50 +45,48 @@ class B2BHistoD3 {
         this.yAxisG = this.svgG.append("g")
             .attr("class", "y-axis");
 
+        // Setup zoom functionality
+        this.setupZoom();
+
         return this;
     }
 
-    setupScales = function(data) {
-        // Convert times to Date objects if they aren't already
-        const parsedTimes = data.times.map(time => 
-            time instanceof Date ? time : new Date(time)
+    setupZoom = function() {
+        // Create zoom behavior
+        this.zoom = d3.zoom()
+            .scaleExtent([1, 20]) // Limit zoom levels
+            .extent([[0, 0], [this.width, this.height]])
+            .on("zoom", this.zoomed.bind(this));
+
+        // Add zoom to svg
+        this.svg.call(this.zoom);
+
+        return this;
+    }
+
+    zoomed = function(event) {
+        if (!this.zoomEnabled) return;
+
+        // Extract the new scale and translation
+        const {transform} = event;
+
+        let newXScale = transform.rescaleX(this.xOriginalXScale);
+
+        if (transform.k === 1) newXScale = this.xOriginalXScale
+
+
+        // Update axes
+        this.xAxisG.call(
+            d3.axisBottom(newXScale)
+                .ticks(d3.timeHour.every(4))
+                .tickFormat(d3.timeFormat("%b %d %H:%M"))
         );
 
-        // X scale with time - precise minute-level scaling
-        this.xScale = d3.scaleTime()
-            .domain([
-                d3.min(parsedTimes), 
-                d3.max(parsedTimes)
-            ])
-            .range([0, this.width]);
+        this.plotAxis(newXScale);
 
-        // Find max values for top and bottom
-        this.maxValueTop = d3.max(data.content.map(d => d3.sum(d.top)));
-        this.maxValueBottom = d3.max(data.content.map(d => d3.sum(d.bottom)));
-
-        // Y scale with symmetric domain
-        this.yScale = d3.scaleLinear()
-            .domain([-1, 1])
-            .range([this.height, 0]);
-
-        // Color scale
-        this.colorTop = d3.scaleOrdinal()
-            .domain(data.classifications.top)
-            .range(d3.schemeCategory10);
-
-        this.colorBottom = d3.scaleOrdinal()
-            .domain(data.classifications.bottom)
-            .range(d3.schemeCategory10);
-
-        // Store parsed times for potential reuse
-        this.parsedTimes = parsedTimes.slice(0, -1);
-
-        // Store data for potential updates
-        this.data = data;
-
-        return this;
+        // Rerender bars with new x scale
+        this.renderBars(newXScale);
     }
-
     renderLegend = function(classifications) {
         // Remove existing legend
         this.legendSvg.remove();
@@ -203,34 +202,31 @@ class B2BHistoD3 {
         return this;
     }
 
-    renderB2BHisto = function (data) {
-        if (!data || !data.content || !data.content.length) return this;
-
-        // Setup scales based on data
-        this.setupScales(data);
+    renderBars = function(xScale) {
+        if (!this.data) return this;
 
         // Normalize data
-        const normalized_data = data.content.map(d => ({
+        const normalized_data = this.data.content.map(d => ({
             top: d.top.map(v => v / this.maxValueTop),
             bottom: d.bottom.map(v => v / this.maxValueBottom)
         }));
 
         // Prepare stacked data
-        const stackTop = d3.stack().keys(d3.range(data.classifications.top.length));
-        const stackBottom = d3.stack().keys(d3.range(data.classifications.bottom.length));
+        const stackTop = d3.stack().keys(d3.range(this.data.classifications.top.length));
+        const stackBottom = d3.stack().keys(d3.range(this.data.classifications.bottom.length));
 
         const topStackedData = stackTop(normalized_data.map(d => d.top));
         const bottomStackedData = stackBottom(normalized_data.map(d => d.bottom.map(v => -v)));
 
-        // Render top bars with explicit join pattern
+        // Render top bars
         const topBars = this.topBarsG.selectAll(".top-bar-group")
             .data(topStackedData)
             .join(
                 enter => enter.append("g")
                     .attr("class", "top-bar-group")
-                    .attr("fill", (d, i) => this.colorTop(data.classifications.top[i])),
+                    .attr("fill", (d, i) => this.colorTop(this.data.classifications.top[i])),
                 update => update
-                    .attr("fill", (d, i) => this.colorTop(data.classifications.top[i])),
+                    .attr("fill", (d, i) => this.colorTop(this.data.classifications.top[i])),
                 exit => exit.remove()
             );
 
@@ -240,39 +236,85 @@ class B2BHistoD3 {
                 enter => {
                     const s = enter.append("rect")
                         .attr("class", "top-bar");
-                    this.updateSquareTop(s);
+                    this.updateSquareTop(s, xScale);
                 },
-                update => this.updateSquareTop(update),
+                update => this.updateSquareTop(update, xScale),
                 exit => exit.remove()
             );
 
-        // Render bottom bars with explicit join pattern
+        // Render bottom bars
         const bottomBars = this.bottomBarsG.selectAll(".bottom-bar-group")
             .data(bottomStackedData)
             .join(
                 enter => enter.append("g")
                     .attr("class", "bottom-bar-group")
-                    .attr("fill", (d, i) => this.colorBottom(data.classifications.bottom[i])),
+                    .attr("fill", (d, i) => this.colorBottom(this.data.classifications.bottom[i])),
                 update => update
-                    .attr("fill", (d, i) => this.colorBottom(data.classifications.bottom[i])),
+                    .attr("fill", (d, i) => this.colorBottom(this.data.classifications.bottom[i])),
                 exit => exit.remove()
             );
 
         bottomBars.selectAll(".bottom-bar")
             .data(d => d)
             .join(
-            enter => {
-                const s = enter.append("rect")
-                .attr("class", "bottom-bar");
-                this.updateSquareBottom(s);
-            },
-            update => this.updateSquareBottom(update),
-            exit => exit.remove()
+                enter => {
+                    const s = enter.append("rect")
+                        .attr("class", "bottom-bar");
+                    this.updateSquareBottom(s, xScale);
+                },
+                update => this.updateSquareBottom(update, xScale),
+                exit => exit.remove()
             );
 
-        // Axes and legend code
+        return this;
+    }
+
+    setupScales = function(data) {
+        // Convert times to Date objects if they aren't already
+        const parsedTimes = data.times.map(time => 
+            time instanceof Date ? time : new Date(time)
+        );
+
+        // X scale with time - precise minute-level scaling
+        this.xOriginalXScale = d3.scaleTime()
+            .domain([
+                d3.min(parsedTimes), 
+                d3.max(parsedTimes)
+            ])
+            .range([0, this.width]);
+
+        this.xScale = this.xOriginalXScale.copy();
+
+        // Find max values for top and bottom
+        this.maxValueTop = d3.max(data.content.map(d => d3.sum(d.top)));
+        this.maxValueBottom = d3.max(data.content.map(d => d3.sum(d.bottom)));
+
+        // Y scale with symmetric domain
+        this.yScale = d3.scaleLinear()
+            .domain([-1, 1])
+            .range([this.height, 0]);
+
+        // Color scales
+        this.colorTop = d3.scaleOrdinal()
+            .domain(data.classifications.top)
+            .range(d3.schemeCategory10);
+
+        this.colorBottom = d3.scaleOrdinal()
+            .domain(data.classifications.bottom)
+            .range(d3.schemeCategory10);
+
+        // Store parsed times for potential reuse
+        this.parsedTimes = parsedTimes.slice(0, -1);
+
+        // Store data for potential updates
+        this.data = data;
+
+        return this;
+    }
+
+    plotAxis = function(xScale) {
         const timeFormatHourMin = d3.timeFormat("%b %d %H:%M");
-        const timeAxis = d3.axisBottom(this.xScale)
+        const timeAxis = d3.axisBottom(xScale)
             .ticks(d3.timeHour.every(4))
             .tickFormat(timeFormatHourMin);
 
@@ -317,27 +359,87 @@ class B2BHistoD3 {
                     return d;
                 }));
 
-        this.renderLegend(data.classifications);
 
         return this;
     }
 
-    updateSquareTop = function(s) { 
-        const square_width = Math.floor(this.width / this.parsedTimes.length);
-        s.attr("x", (d, i) => this.xScale(this.parsedTimes[i]))
+    renderB2BHisto = function (data) {
+        if (!data || !data.content || !data.content.length) return this;
+
+        // Setup scales based on data
+        this.setupScales(data);
+
+        // Render bars with initial x scale
+        this.renderBars(this.xScale);
+
+        // Axes
+        this.plotAxis(this.xScale);
+
+        // Legend
+        this.renderLegend(data.classifications);
+
+
+        return this;
+    }
+
+    updateSquareTop = function(s, xScale = this.xScale) { 
+        s.attr("x", (d, i) => xScale(this.parsedTimes[i]))
             .attr("y", d => this.yScale(d[1]))
             .attr("height", d => this.yScale(d[0]) - this.yScale(d[1]))
-            .attr("width", square_width);
+            .attr("width", (d, i) => {
+                // Skip if x position is outside visible area
+                const x = xScale(this.parsedTimes[i]);
+                if (x < 0 || x > this.width) return 0;
+
+                // For the last element, use the same width as previous
+                if (i === this.parsedTimes.length - 1) {
+                    const current = xScale(this.parsedTimes[i]);
+                    const prev = xScale(this.parsedTimes[i-1]);
+                    return prev - current;
+                }
+                // Calculate width based on difference between current and next timestamp
+                const current = xScale(this.parsedTimes[i]);
+                const next = xScale(this.parsedTimes[i+1]);
+                return Math.abs(next - current);
+            });
         return s;
     }
 
-    updateSquareBottom = function(s) {
-        const square_width = Math.floor(this.width / this.parsedTimes.length);
-        s.attr("x", (d, i) => this.xScale(this.parsedTimes[i]))
+    updateSquareBottom = function(s, xScale = this.xScale) {
+        s.attr("x", (d, i) => xScale(this.parsedTimes[i]))
             .attr("y", d => this.yScale(d[0]))
             .attr("height", d => this.yScale(d[1]) - this.yScale(d[0]))
-            .attr("width", square_width);
+            .attr("width", (d, i) => {
+                // Skip if x position is outside visible area
+                const x = xScale(this.parsedTimes[i]);
+                if (x < 0 || x > this.width) return 0;
+
+                // For the last element, use the same width as previous
+                if (i === this.parsedTimes.length - 1) {
+                    const current = xScale(this.parsedTimes[i]);
+                    const prev = xScale(this.parsedTimes[i-1]);
+                    return prev - current;
+                }
+                // Calculate width based on difference between current and next timestamp
+                const current = xScale(this.parsedTimes[i]);
+                const next = xScale(this.parsedTimes[i+1]);
+                return Math.abs(next - current);
+            });
         return s;
+    }
+
+    // New method to enable/disable zooming
+    toggleZoom = function(enable = true) {
+        this.zoomEnabled = enable;
+        return this;
+    }
+
+    // New method to reset zoom
+    resetZoom = function() {
+        this.svg.transition()
+            .duration(750)
+            .call(this.zoom.transform, d3.zoomIdentity);
+        return this;
     }
 
     clear = function(){
