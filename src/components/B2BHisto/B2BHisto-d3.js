@@ -159,7 +159,7 @@ class B2BHistoD3 {
         currentLine = 0;
 
         classifications.bottom.forEach((d, i) => {
-            const textWidth = d.length * 8 + 30;
+            const textWidth = String(d).length * 8 + 30;
             if (currentX + textWidth > this.width) {
                 currentX = 0;
                 currentLine++;
