@@ -180,6 +180,55 @@ class B2BHistoD3 {
 
         const lineHeight = 25;
 
+        const self = this;
+
+        // Tracking visibility for each classification
+        if (!this.classVisibility) {
+            this.classVisibility = {
+                top: classifications.top.map(() => true),
+                bottom: classifications.bottom.map(() => true)
+            };
+        }
+
+        // Function to toggle class visibility
+        const toggleClassVisibility = (isTop, index) => {
+            // Toggle the visibility state
+            this.classVisibility[isTop ? 'top' : 'bottom'][index] = !this.classVisibility[isTop ? 'top' : 'bottom'][index];
+
+            this.setupScales(this.data);
+
+            // Rerender bars with updated visibility
+            this.renderBars(self.xScale);
+
+            this.plotAxis(this.xScale);
+
+            // Update legend item appearance
+            updateLegendAppearance(isTop);
+
+        };
+
+        // Function to update legend item appearance
+        const updateLegendAppearance = (isTop) => {
+            const legendItems = isTop ? topLegend : bottomLegend;
+
+            legendItems.selectAll(".legend-item")
+                .each(function(d, i) {
+
+                    const opacity = isTop 
+                        ? (self.classVisibility.top[i] ? 1 : 0.3)
+                        : (self.classVisibility.bottom[i] ? 1 : 0.3);
+
+                    d3.select(this)
+                        .selectAll("rect")
+                        .style("opacity", opacity);
+                    
+                    d3.select(this)
+                        .selectAll("text")
+                        .style("opacity", opacity);
+                });
+        };
+
+        // Top Legend
         const topLegend = this.legendSvg.append("g")
             .attr("class", "top-legend")
             .attr("transform", "translate(0, 20)");
@@ -212,24 +261,28 @@ class B2BHistoD3 {
             .attr("opacity", 0.8)
             .attr("transform", "translate(0, -13)");
 
-        topLegend.selectAll(".top-legend-item")
+        const topLegendGroup = topLegend.selectAll(".top-legend-item")
             .data(classifications.top)
             .join("g")
-            .attr("class", "top-legend-item")
+            .attr("class", "top-legend-item legend-item")
             .attr("transform", (d, i) => `translate(${topOffsets[i][0]}, ${topOffsets[i][1]})`)
-            .call(g => g.append("rect")
-                .attr("width", 10)
-                .attr("height", 10)
-                .attr("fill", this.colorTop));
+            .style("cursor", "pointer")
+            .on("click", function(event, d) {
+                const index = classifications.top.indexOf(d);
+                toggleClassVisibility(true, index);
+            });
 
-        topLegend.selectAll(".top-legend-text")
-            .data(classifications.top)
-            .join("text")
-            .attr("class", "top-legend-text")
-            .attr("x", (d, i) => topOffsets[i][0] + 15)
-            .attr("y", (d, i) => topOffsets[i][1] + 10)
-            .text(d => d);
+        topLegendGroup.call(g => g.append("rect")
+            .attr("width", 10)
+            .attr("height", 10)
+            .attr("fill", this.colorTop));
 
+        topLegendGroup.call(g => g.append("text")
+            .attr("x", 15)
+            .attr("y", 10)
+            .text(d => d));
+
+        // Bottom Legend - similar structure to top legend
         let bottomOffsets = [];
         currentX = 0;
         currentLine = 0;
@@ -262,23 +315,26 @@ class B2BHistoD3 {
             .attr("opacity", 0.8)
             .attr("transform", "translate(0, -13)");
 
-        bottomLegend.selectAll(".bottom-legend-item")
+        const bottomLegendGroup = bottomLegend.selectAll(".bottom-legend-item")
             .data(classifications.bottom)
             .join("g")
-            .attr("class", "bottom-legend-item")
+            .attr("class", "bottom-legend-item legend-item")
             .attr("transform", (d, i) => `translate(${bottomOffsets[i][0]}, ${bottomOffsets[i][1]})`)
-            .call(g => g.append("rect")
-                .attr("width", 10)
-                .attr("height", 10)
-                .attr("fill", this.colorBottom));
+            .style("cursor", "pointer")
+            .on("click", function(event, d) {
+                const index = classifications.bottom.indexOf(d);
+                toggleClassVisibility(false, index);
+            });
 
-        bottomLegend.selectAll(".bottom-legend-text")
-            .data(classifications.bottom)
-            .join("text")
-            .attr("class", "bottom-legend-text")
-            .attr("x", (d, i) => bottomOffsets[i][0] + 15)
-            .attr("y", (d, i) => bottomOffsets[i][1] + 10)
-            .text(d => d);
+        bottomLegendGroup.call(g => g.append("rect")
+            .attr("width", 10)
+            .attr("height", 10)
+            .attr("fill", this.colorBottom));
+
+        bottomLegendGroup.call(g => g.append("text")
+            .attr("x", 15)
+            .attr("y", 10)
+            .text(d => d));
 
         return this;
     }
@@ -286,13 +342,17 @@ class B2BHistoD3 {
     renderBars = function(xScale) {
         if (!this.data) return this;
 
-        // Normalize data
+        // Normalize data, respecting visibility
         const normalized_data = this.data.content.map(d => ({
-            top: d.top.map(v => v / this.maxValueTop),
-            bottom: d.bottom.map(v => v / this.maxValueBottom)
+        top: d.top.map((v, i) => 
+            !this.classVisibility || this.classVisibility.top[i] ? v / this.maxValueTop : 0
+        ),
+        bottom: d.bottom.map((v, i) => 
+            !this.classVisibility || this.classVisibility.bottom[i] ? v / this.maxValueBottom : 0
+        )
         }));
 
-        // Prepare stacked data
+        // Existing implementation follows...
         const stackTop = d3.stack().keys(d3.range(this.data.classifications.top.length));
         const stackBottom = d3.stack().keys(d3.range(this.data.classifications.bottom.length));
 
@@ -401,9 +461,21 @@ class B2BHistoD3 {
 
         this.xScale = this.xOriginalXScale.copy();
 
-        // Find max values for top and bottom
-        this.maxValueTop = d3.max(data.content.map(d => d3.sum(d.top)));
-        this.maxValueBottom = d3.max(data.content.map(d => d3.sum(d.bottom)));
+        const visibleTopIndices = this.classVisibility.top
+        .reduce((acc, isVisible, index) => isVisible ? [...acc, index] : acc, []);
+        
+        const visibleBottomIndices = this.classVisibility.bottom
+            .reduce((acc, isVisible, index) => isVisible ? [...acc, index] : acc, []);
+
+        // Filter data based on visible classifications
+        const filteredContent = data.content.map(item => ({
+            top: item.top.filter((_, i) => visibleTopIndices.includes(i)),
+            bottom: item.bottom.filter((_, i) => visibleBottomIndices.includes(i))
+        }));
+
+        // Update max values for visible classifications
+        this.maxValueTop = d3.max(filteredContent.map(d => d3.sum(d.top))) || 1;
+        this.maxValueBottom = d3.max(filteredContent.map(d => d3.sum(d.bottom))) || 1;
 
         // Y scale with symmetric domain
         this.yScale = d3.scaleLinear()
@@ -490,6 +562,8 @@ class B2BHistoD3 {
     renderB2BHisto = function (data) {
         if (!data || !data.content || !data.content.length) return this;
 
+        this.resetClassFilter(data);
+
         // Setup scales based on data
         this.setupScales(data);
 
@@ -520,6 +594,7 @@ class B2BHistoD3 {
 
                 if (Math.abs(next - current) < width_offset) return 0;
                 if (x > this.width) return 0;
+                if (i === this.parsedTimes.length - 1) return this.width - current;
 
                 return Math.abs(Math.min(this.width, next) - current) - width_offset;
 
@@ -541,6 +616,7 @@ class B2BHistoD3 {
 
                 if (Math.abs(next - current) < width_offset) return 0;
                 if (x > this.width) return 0;
+                if (i === this.parsedTimes.length - 1) return this.width - current;
 
                 return Math.abs(Math.min(this.width, next) - current) - width_offset;
             });
@@ -550,6 +626,15 @@ class B2BHistoD3 {
     // New method to enable/disable zooming
     toggleZoom = function(enable = true) {
         this.zoomEnabled = enable;
+        return this;
+    }
+
+    // Reset method to restore all classifications
+    resetClassFilter = function(data) {
+        this.classVisibility = {
+            top: data.classifications.top.map(() => true),
+            bottom: data.classifications.bottom.map(() => true)
+        };
         return this;
     }
 
