@@ -49,13 +49,12 @@ function HistoTimeLineContainer() {
             return;
         }
 
-        console.log("Data", data);
 
         const behaviors = {
             timeLineSelection: (interval) => {
                 dispatch(selectTimeLine({
-                    start : interval.start,
-                    end : interval.end
+                    start: interval.start,
+                    end: interval.end
                 }));
                 return;
             }

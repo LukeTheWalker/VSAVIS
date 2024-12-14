@@ -12,7 +12,9 @@ const defaultParams = {
     fir: "Syslog priority",
     ids: "classification",
     bins: 100,
-    mode: 'count'
+    mode: 'count',
+    start: "2012-04-05 17:51:00",
+    end: "2012-04-07 08:59:00"
 };
 
 /**
@@ -35,12 +37,16 @@ export const getB2BHistoData = createAsyncThunk('b2bHistoSlice/getB2BHistData', 
     const ids_param = args.ids === undefined ? defaultParams.ids : args.ids;
     const bins_param = args.bins === undefined ? defaultParams.bins : args.bins;
     const mode_param = args.mode === undefined ? defaultParams.mode : args.mode;
+    const start_param = args.start === undefined ? defaultParams.start : args.start;
+    const end_param = args.end === undefined ? defaultParams.end : args.end;
 
     const queryParameters = new URLSearchParams({
         fir: fir_param,
         ids: ids_param,
         bins: bins_param,
-        mode: mode_param
+        mode: mode_param,
+        start: start_param,
+        end: end_param
     })  
 
     // console.log("Query parameters: ", queryParameters);

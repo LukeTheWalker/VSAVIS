@@ -14,7 +14,6 @@ class HistoTimeLineD3 {
     constructor(el) {
         this.el = el;
         this.manageBrushingEnd = this.manageBrushingEnd.bind(this);
-        this.manageBrushing = this.manageBrushing.bind(this);
     }
 
     create = function (config) {
@@ -36,8 +35,6 @@ class HistoTimeLineD3 {
 
         this.brush = d3.brushX()
             .extent([[0,0], [this.width, this.height-1]])
-            .on("start", this.manageBrushing)
-            .on("brush", this.manageBrushing)
             .on("end", this.manageBrushingEnd);
 
         this.svgG.append("g")
@@ -48,28 +45,27 @@ class HistoTimeLineD3 {
         return this;
     }
 
-
-    manageBrushing = function () {
-        console.log("Brushing");
-    }
-
     manageBrushingEnd = function (e) {
         // Get the selection of the brush
         const selection = e.selection;
         // If the selection is a single point, do nothing
-        if (!selection) return;
-        if (selection[0] === selection[1]) { console.log("Single point selection"); return; };
+        if (!selection) { this.behaviors.timeLineSelection({}); return; }
         // Otherwise, print the extremes of the selection
         const beginTime = this.xScale.invert(selection[0]);
         const endTime = this.xScale.invert(selection[1]);
 
-        this.behaviors.timeLineSelection({start: Date(beginTime).toString(), end: Date(endTime).toString()});
+        let beginTimeStr = d3.timeFormat('%Y-%m-%d %H:%M:%S')(beginTime);
+        let endTimeStr = d3.timeFormat('%Y-%m-%d %H:%M:%S')(endTime);
+
+        this.behaviors.timeLineSelection({
+            start: beginTimeStr,
+            end: endTimeStr
+        });
     }
 
 
     setupScales = function(data) {
         // Convert times to Date objects if they are not already
-        console.log("Data: ", data);
         const beginTime = data.times.begin instanceof Date ? data.times.begin : new Date(data.times.begin);
         const endTime = data.times.end instanceof Date ? data.times.end : new Date(data.times.end);
 

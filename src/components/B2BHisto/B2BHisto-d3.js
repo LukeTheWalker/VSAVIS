@@ -95,7 +95,6 @@ class B2BHistoD3 {
             .attr("transform", `translate(${100}, 0)`)
             .attr("class", "legend-group");
 
-        // Rest of the code remains the same
         const lineHeight = 25;
 
         const topLegend = this.legendSvg.append("g")
@@ -430,14 +429,6 @@ class B2BHistoD3 {
     // New method to enable/disable zooming
     toggleZoom = function(enable = true) {
         this.zoomEnabled = enable;
-        return this;
-    }
-
-    // New method to reset zoom
-    resetZoom = function() {
-        this.svg.transition()
-            .duration(750)
-            .call(this.zoom.transform, d3.zoomIdentity);
         return this;
     }
 

@@ -13,8 +13,8 @@ function B2BHistoContainer() {
     const selectedValueFirewall = useSelector(state => state.selection.dropdownFirewall);
     const selectedValueModeFIR = useSelector(state => state.selection.dropdownModeFIR);
     const selectedValueNumBins = useSelector(state => state.selection.numBins);
+    const selectedInterval = useSelector(state => state.histoTimeline.selectedInterval);
     
-    console.log("selectedValueIDS", selectedValueIDS);  
     const dispatch = useDispatch();
 
     const divB2BHistoContainerRef  = useRef(null);
@@ -58,8 +58,17 @@ function B2BHistoContainer() {
 
     // did update, called each time dependencies change, dispatch remain stable over component cycles
     useEffect(() => {
-        dispatch(getB2BHistoData({fir: selectedValueFirewall,ids: selectedValueIDS, mode: selectedValueModeFIR, bins:selectedValueNumBins}));
-    }, [selectedValueIDS, selectedValueFirewall, selectedValueModeFIR, selectedValueNumBins, dispatch]);// if dependencies, useEffect is called after each data update, in our case only matrixData changes.
+        console.log("Doing a new fetch with the following parameters: ", selectedValueIDS, selectedValueFirewall, selectedValueModeFIR, selectedValueNumBins, selectedInterval);
+        dispatch(
+            getB2BHistoData({
+                fir: selectedValueFirewall,
+                ids: selectedValueIDS, 
+                mode: selectedValueModeFIR, 
+                bins:selectedValueNumBins,
+                start: selectedInterval.start, 
+                end: selectedInterval.end
+            }));
+    }, [selectedValueIDS, selectedValueFirewall, selectedValueModeFIR, selectedValueNumBins, selectedInterval, dispatch]);
 
 
     return (

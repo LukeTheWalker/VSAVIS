@@ -19,15 +19,13 @@ export const histoTimeLineSlice = createSlice({
     name: 'histoTimeLineSlice',
     initialState: {
         data: [],
-        selectedInterval: {start: null, end: null}
+        selectedInterval: {start: "2012-04-05 17:51:00", end: "2012-04-07 08:59:00"}
     },
     reducers: {
         // reducer for the selection of the time line
         selectTimeLine: (state, action) => {
             state.selectedInterval.start = action.payload.start;
             state.selectedInterval.end = action.payload.end;
-
-            console.log("Selected interval: ", state.selectedInterval.start, state.selectedInterval.end);
         }
 
 
@@ -35,7 +33,6 @@ export const histoTimeLineSlice = createSlice({
     extraReducers: 
         builder => {
             builder.addCase(getHistoTimeLineData.fulfilled, (state, action) => {
-                console.log("AA");
                 state.data = action.payload
             })
         }
