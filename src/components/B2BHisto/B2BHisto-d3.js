@@ -312,8 +312,12 @@ class B2BHistoD3 {
 
     plotAxis = function(xScale) {
         const timeFormatHourMin = d3.timeFormat("%b %d %H:%M");
+        const timeRange = xScale.range();
+        const tickPositions = Array.from({length: 6}, (_, i) => 
+            timeRange[0] + (timeRange[1] - timeRange[0]) * (i/5)
+        );
         const timeAxis = d3.axisBottom(xScale)
-            .ticks(d3.timeHour.every(4))
+            .tickValues(tickPositions.map(t => xScale.invert(t)))
             .tickFormat(timeFormatHourMin);
 
         // clear svg 
