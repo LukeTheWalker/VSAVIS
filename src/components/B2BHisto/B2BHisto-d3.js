@@ -68,16 +68,22 @@ class B2BHistoD3 {
         // Remove any existing chart
         this.tooltip.select("svg").remove();
 
-        // Filter out any zero values and their corresponding classifications
-        const nonZeroData = data.filter(d => d > 0);
-        const classifications = isTop 
-            ? this.data.classifications.top.filter((_, i) => data[i] > 0)
-            : this.data.classifications.bottom.filter((_, i) => data[i] > 0);
+        // Filter out zero values, hidden classifications, and their corresponding data
+        const visibleData = data.filter((d, i) => {
+            const isVisible = isTop 
+                ? this.classVisibility.top[i] 
+                : this.classVisibility.bottom[i];
+            return d > 0 && isVisible;
+        });
+
+        const visibleClassifications = isTop 
+            ? this.data.classifications.top.filter((_, i) => data[i] > 0 && this.classVisibility.top[i])
+            : this.data.classifications.bottom.filter((_, i) => data[i] > 0 && this.classVisibility.bottom[i]);
 
         // Pie chart configuration
-        const width = 250; // Increased width to accommodate legend
+        const width = 250;
         const height = 120;
-        const radius = Math.min(width - 130, height) / 2; // Adjust radius to leave space for legend
+        const radius = Math.min(width - 130, height) / 2;
 
         const pie = d3.pie()
             .value(d => d)
@@ -102,10 +108,10 @@ class B2BHistoD3 {
 
         // Create pie chart segments
         pieGroup.selectAll("path")
-            .data(pie(nonZeroData))
+            .data(pie(visibleData))
             .join("path")
             .attr("d", arc)
-            .attr("fill", (d, i) => colorScale(classifications[i]))
+            .attr("fill", (d, i) => colorScale(visibleClassifications[i]))
             .attr("stroke", "white")
             .style("stroke-width", "1px");
 
@@ -114,7 +120,7 @@ class B2BHistoD3 {
             .attr("transform", `translate(${2*radius + 20}, 10)`);
 
         legend.selectAll("rect")
-            .data(classifications)
+            .data(visibleClassifications)
             .join("rect")
             .attr("y", (d, i) => i * 20)
             .attr("width", 10)
@@ -122,7 +128,7 @@ class B2BHistoD3 {
             .attr("fill", d => colorScale(d));
 
         legend.selectAll("text")
-            .data(classifications)
+            .data(visibleClassifications)
             .join("text")
             .attr("x", 15)
             .attr("y", (d, i) => i * 20 + 9)
@@ -381,7 +387,7 @@ class B2BHistoD3 {
                     const mouseX = this.xScale.invert(d3.pointer(event)[0]);
                     const timeIndex = this.parsedTimes.findIndex((t, i) => {
                         const nextT = i < this.parsedTimes.length - 1 ? this.parsedTimes[i + 1] : new Date(t.getTime() + (t.getTime() - this.parsedTimes[i-1].getTime()));
-                        return mouseX >= t && mouseX < nextT;
+                        return mouseX > t && mouseX < nextT;
                     });
 
                     const barData = this.data.content[timeIndex].top;
@@ -422,8 +428,8 @@ class B2BHistoD3 {
                 .on("mouseover", (event, d) => {
                     const mouseX = this.xScale.invert(d3.pointer(event)[0]);
                     const timeIndex = this.parsedTimes.findIndex((t, i) => {
-                    const nextT = i < this.parsedTimes.length - 1 ? this.parsedTimes[i + 1] : new Date(t.getTime() + (t.getTime() - this.parsedTimes[i-1].getTime()));
-                    return mouseX >= t && mouseX < nextT;
+                        const nextT = i < this.parsedTimes.length - 1 ? this.parsedTimes[i + 1] : new Date(t.getTime() + (t.getTime() - this.parsedTimes[i-1].getTime()));
+                        return mouseX >= t && mouseX < nextT;
                     });
                     const barData = this.data.content[timeIndex].bottom;
 
@@ -581,7 +587,8 @@ class B2BHistoD3 {
     }
 
     updateSquareTop = function(s, xScale = this.xScale) {
-        s.attr("x", (d, i) => Math.max(0, xScale(this.parsedTimes[i])))
+        const padding = 1; // Add 1 pixel padding between bars
+        s.attr("x", (d, i) => Math.max(0, xScale(this.parsedTimes[i])) + padding/2)
             .attr("y", d => this.yScale(d[1]))
             .attr("height", d => this.yScale(d[0]) - this.yScale(d[1]))
             .attr("width", (d, i) => {
@@ -594,16 +601,16 @@ class B2BHistoD3 {
 
                 if (Math.abs(next - current) < width_offset) return 0;
                 if (x > this.width) return 0;
-                if (i === this.parsedTimes.length - 1) return this.width - current;
+                if (i === this.parsedTimes.length - 1) return this.width - current - padding;
 
-                return Math.abs(Math.min(this.width, next) - current) - width_offset;
-
+                return Math.abs(Math.min(this.width, next) - current) - width_offset - padding;
             });
         return s;
     }
 
     updateSquareBottom = function(s, xScale = this.xScale) {
-        s.attr("x", (d, i) => Math.max(0, xScale(this.parsedTimes[i])))
+        const padding = 1; // Add 1 pixel padding between bars
+        s.attr("x", (d, i) => Math.max(0, xScale(this.parsedTimes[i])) + padding/2)
             .attr("y", d => this.yScale(d[0]))
             .attr("height", d => this.yScale(d[1]) - this.yScale(d[0]))
             .attr("width", (d, i) => {
@@ -616,9 +623,9 @@ class B2BHistoD3 {
 
                 if (Math.abs(next - current) < width_offset) return 0;
                 if (x > this.width) return 0;
-                if (i === this.parsedTimes.length - 1) return this.width - current;
+                if (i === this.parsedTimes.length - 1) return this.width - current - padding;
 
-                return Math.abs(Math.min(this.width, next) - current) - width_offset;
+                return Math.abs(Math.min(this.width, next) - current) - width_offset - padding;
             });
         return s;
     }
