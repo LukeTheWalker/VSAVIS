@@ -506,48 +506,43 @@ class B2BHistoD3 {
         return this;
     }
 
-    updateSquareTop = function(s, xScale = this.xScale) { 
-        s.attr("x", (d, i) => xScale(this.parsedTimes[i]))
+    updateSquareTop = function(s, xScale = this.xScale) {
+        s.attr("x", (d, i) => Math.max(0, xScale(this.parsedTimes[i])))
             .attr("y", d => this.yScale(d[1]))
             .attr("height", d => this.yScale(d[0]) - this.yScale(d[1]))
             .attr("width", (d, i) => {
-                // Skip if x position is outside visible area
                 const x = xScale(this.parsedTimes[i]);
-                if (x < 0 || x > this.width) return 0;
+                
+                let width_offset = x < 0 ? Math.abs(x) : 0;
 
-                // For the last element, use the same width as previous
-                if (i === this.parsedTimes.length - 1) {
-                    const current = xScale(this.parsedTimes[i]);
-                    const prev = xScale(this.parsedTimes[i-1]);
-                    return Math.abs(prev - current);
-                }
-                // Calculate width based on difference between current and next timestamp
                 const current = xScale(this.parsedTimes[i]);
                 const next = xScale(this.parsedTimes[i+1]);
-                return Math.abs(next - current);
+
+                if (Math.abs(next - current) < width_offset) return 0;
+                if (x > this.width) return 0;
+
+                return Math.abs(Math.min(this.width, next) - current) - width_offset;
+
             });
         return s;
     }
 
     updateSquareBottom = function(s, xScale = this.xScale) {
-        s.attr("x", (d, i) => xScale(this.parsedTimes[i]))
+        s.attr("x", (d, i) => Math.max(0, xScale(this.parsedTimes[i])))
             .attr("y", d => this.yScale(d[0]))
             .attr("height", d => this.yScale(d[1]) - this.yScale(d[0]))
             .attr("width", (d, i) => {
-                // Skip if x position is outside visible area
                 const x = xScale(this.parsedTimes[i]);
-                if (x < 0 || x > this.width) return 0;
+                
+                let width_offset = x < 0 ? Math.abs(x) : 0;
 
-                // For the last element, use the same width as previous
-                if (i === this.parsedTimes.length - 1) {
-                    const current = xScale(this.parsedTimes[i]);
-                    const prev = xScale(this.parsedTimes[i-1]);
-                    return  Math.abs(prev - current);
-                }
-                // Calculate width based on difference between current and next timestamp
                 const current = xScale(this.parsedTimes[i]);
                 const next = xScale(this.parsedTimes[i+1]);
-                return Math.abs(next - current);
+
+                if (Math.abs(next - current) < width_offset) return 0;
+                if (x > this.width) return 0;
+
+                return Math.abs(Math.min(this.width, next) - current) - width_offset;
             });
         return s;
     }

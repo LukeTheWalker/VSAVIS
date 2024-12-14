@@ -25,7 +25,7 @@ function B2BHistoContainer() {
         let height;
         if (divB2BHistoContainerRef.current !== undefined) {
             width=divB2BHistoContainerRef.current.offsetWidth;
-            height= 1000;
+            height= 500;
         }
         return { width: width, height: height };
     }
