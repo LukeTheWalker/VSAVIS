@@ -13,8 +13,6 @@ function PieChartContainer() {
         keys.push(Object.keys(data[i])[0]);
     }
 
-    console.log("data:", data);
-    console.log("keys:", keys);
     const resized = useSelector(state => state.global.resized);
 
     const dispatch = useDispatch();
@@ -69,8 +67,7 @@ function PieChartContainer() {
             const item = data[i];
             if (item && divPieChartContainerRefs.current[i]) {
                 const processedData = preprocessData(item);
-                console.log(`Processed data for chart ${i}:`, processedData);
-                pieChartD3Refs.current[i].update(processedData, keys[i], getContainerSize(i));
+                pieChartD3Refs.current[i].update(processedData, keys[i]);
             }
         }
     }, [data]);

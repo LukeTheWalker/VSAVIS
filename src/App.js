@@ -63,6 +63,7 @@ function App() {
                         <option value="Destination port">Destination port</option>
                         <option value="Destination service">Destination service</option>
                         <option value="Direction">Direction</option>
+                        <option value="Protocol">Protocol</option>
                     </select>
 
                     <label htmlFor="dropdownModeFIR" className="dropdown-label">Choose an attribute for the Firewall Mode:</label>

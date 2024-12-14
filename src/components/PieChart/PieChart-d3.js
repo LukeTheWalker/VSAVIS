@@ -28,7 +28,6 @@ class PieChartD3 {
     }
 
     update(data, key) {
-        console.log('Updating pie chart with data: ', data);
         if (!data || !this.svg) return;
     
         const pie = d3.pie().value(d => d.value);
@@ -114,8 +113,6 @@ class PieChartD3 {
 
         }
     }
-    
-    
     
     clear() {
         if (this.svg) {
