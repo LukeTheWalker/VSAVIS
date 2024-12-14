@@ -12,7 +12,47 @@ export const getHistoTimeLineData = createAsyncThunk('histoTimeLineSlice/getHist
         }
     });
     const responseJSON = await response.json();
-    return responseJSON;
+
+    const responseHisto = await fetch(server + '/getB2BHistData?bins=1000&mode=count', {
+        headers: {
+            'ngrok-skip-browser-warning': 'true'
+        }
+    }
+    );
+    const responseJSONHisto = await responseHisto.json();
+
+    console.log("Response JSON Histo: ", responseJSONHisto);
+    const times = responseJSONHisto.times;
+    // cancel the last element
+
+    const topArrays = responseJSONHisto.content.map((item) => {
+        return item.top;
+    })
+    const summedTopArrays = topArrays.map((item) => {
+        return item.reduce((a, b) => a + b, 0);
+    });
+
+    const histogram = times.map((time, index) => {
+        const currentTime = new Date(time).getTime();
+        const nextTime = index < times.length - 1 ? new Date(times[index + 1]).getTime() : currentTime;
+        const averageTime = new Date((currentTime + nextTime) / 2).toISOString();
+        return {
+            "time": averageTime,
+            "count": summedTopArrays[index]
+        }
+    });
+
+    histogram.pop();
+
+    const final_obj = {
+        "timeline": responseJSON,
+        "histogram": histogram
+    }
+
+    console.log("Final obj", final_obj);
+
+
+    return final_obj;
 });
 
 export const histoTimeLineSlice = createSlice({
