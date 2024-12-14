@@ -51,42 +51,41 @@ class B2BHistoD3 {
         return this;
     }
 
-    setupZoom = function() {
+    setupZoom = function () {
         // Create zoom behavior
         this.zoom = d3.zoom()
             .scaleExtent([1, 20]) // Limit zoom levels
+            .translateExtent([[0, 0], [this.width, this.height]]) // Define panning boundaries
             .extent([[0, 0], [this.width, this.height]])
             .on("zoom", this.zoomed.bind(this));
-
-        // Add zoom to svg
+    
+        // Add zoom and panning to the SVG
         this.svg.call(this.zoom);
-
+    
         return this;
-    }
-
-    zoomed = function(event) {
+    };
+    
+    zoomed = function (event) {
         if (!this.zoomEnabled) return;
-
-        // Extract the new scale and translation
-        const {transform} = event;
-
-        let newXScale = transform.rescaleX(this.xOriginalXScale);
-
-        if (transform.k === 1) newXScale = this.xOriginalXScale
-
-
-        // Update axes
-        this.xAxisG.call(
-            d3.axisBottom(newXScale)
-                .ticks(d3.timeHour.every(4))
-                .tickFormat(d3.timeFormat("%b %d %H:%M"))
-        );
-
+    
+        const { transform } = event; // Extract the zoom/pan transform
+    
+        // Update xScale with the new transform
+        const newXScale = transform.rescaleX(this.xOriginalXScale);
+    
         this.plotAxis(newXScale);
 
-        // Rerender bars with new x scale
+        // Update bars and other elements to reflect new xScale
         this.renderBars(newXScale);
-    }
+    };
+    
+    resetZoom = function () {
+        this.svg.transition()
+            .duration(750)
+            .call(this.zoom.transform, d3.zoomIdentity); // Reset transform to identity
+        return this;
+    };
+
     renderLegend = function(classifications) {
         // Remove existing legend
         this.legendSvg.remove();
@@ -395,7 +394,7 @@ class B2BHistoD3 {
                 if (i === this.parsedTimes.length - 1) {
                     const current = xScale(this.parsedTimes[i]);
                     const prev = xScale(this.parsedTimes[i-1]);
-                    return prev - current;
+                    return Math.abs(prev - current);
                 }
                 // Calculate width based on difference between current and next timestamp
                 const current = xScale(this.parsedTimes[i]);
@@ -418,7 +417,7 @@ class B2BHistoD3 {
                 if (i === this.parsedTimes.length - 1) {
                     const current = xScale(this.parsedTimes[i]);
                     const prev = xScale(this.parsedTimes[i-1]);
-                    return prev - current;
+                    return  Math.abs(prev - current);
                 }
                 // Calculate width based on difference between current and next timestamp
                 const current = xScale(this.parsedTimes[i]);
