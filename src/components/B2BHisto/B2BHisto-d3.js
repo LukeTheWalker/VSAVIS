@@ -153,6 +153,8 @@ class B2BHistoD3 {
     
         // Update xScale with the new transform
         const newXScale = transform.rescaleX(this.xOriginalXScale);
+
+        this.xScale = newXScale;
     
         this.plotAxis(newXScale);
 
