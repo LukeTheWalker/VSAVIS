@@ -603,7 +603,7 @@ class B2BHistoD3 {
                 if (x > this.width) return 0;
                 if (i === this.parsedTimes.length - 1) return this.width - current - padding;
 
-                return Math.abs(Math.min(this.width, next) - current) - width_offset - padding;
+                return Math.max(0, Math.abs(Math.min(this.width, next) - current) - width_offset - padding);
             });
         return s;
     }
@@ -625,7 +625,7 @@ class B2BHistoD3 {
                 if (x > this.width) return 0;
                 if (i === this.parsedTimes.length - 1) return this.width - current - padding;
 
-                return Math.abs(Math.min(this.width, next) - current) - width_offset - padding;
+                return Math.max(0, Math.abs(Math.min(this.width, next) - current) - width_offset - padding);
             });
         return s;
     }
