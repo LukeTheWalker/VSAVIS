@@ -36,6 +36,9 @@ class HistoTimeLineD3 {
         this.brush = d3.brushX()
         .extent([[0,0], [this.width, this.height-1]])
         .on("end", this.manageBrushingEnd);
+
+        this.allDotsG = this.svgG.append("g")
+        .attr("class", "dots");
         
         this.svgG.append("g")
         .attr("class", "brush")
@@ -100,8 +103,8 @@ class HistoTimeLineD3 {
         .y(d => this.yScale(d.count));
         
         // Draw the line
-        this.svgG.selectAll(".line").remove();
-        this.svgG.append("path")
+        this.allDotsG.selectAll(".line").remove();
+        this.allDotsG.append("path")
         .attr("class", "line")
         .datum(histoData)
         .attr("fill", "none")
@@ -116,8 +119,8 @@ class HistoTimeLineD3 {
         .y1(d => this.yScale(d.count)); // Top (data points)
         
         // Draw the area
-        this.svgG.selectAll(".area").remove(); // Remove existing areas if any
-        this.svgG.append("path")
+        this.allDotsG.selectAll(".area").remove(); // Remove existing areas if any
+        this.allDotsG.append("path")
         .attr("class", "area")
         .datum(histoData)
         .attr("fill", "steelblue") // Fill color
