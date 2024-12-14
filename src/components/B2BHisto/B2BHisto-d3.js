@@ -48,6 +48,87 @@ class B2BHistoD3 {
         // Setup zoom functionality
         this.setupZoom();
 
+        // Create tooltip div
+        this.tooltip = d3.select(this.el)
+            .append("div")
+            .attr("class", "b2b-tooltip")
+            .style("position", "absolute")
+            .style("visibility", "hidden")
+            .style("background", "white")
+            .style("border", "1px solid #ccc")
+            .style("border-radius", "5px")
+            .style("padding", "10px")
+            .style("box-shadow", "0 2px 5px rgba(0,0,0,0.1)");
+
+        return this;
+    }
+
+    // New method to create tooltip pie chart
+    createTooltipPieChart = function(data, isTop) {
+        // Remove any existing chart
+        this.tooltip.select("svg").remove();
+
+        // Filter out any zero values and their corresponding classifications
+        const nonZeroData = data.filter(d => d > 0);
+        const classifications = isTop 
+            ? this.data.classifications.top.filter((_, i) => data[i] > 0)
+            : this.data.classifications.bottom.filter((_, i) => data[i] > 0);
+
+        // Pie chart configuration
+        const width = 250; // Increased width to accommodate legend
+        const height = 120;
+        const radius = Math.min(width - 130, height) / 2; // Adjust radius to leave space for legend
+
+        const pie = d3.pie()
+            .value(d => d)
+            .sort(null);
+
+        const arc = d3.arc()
+            .innerRadius(0)
+            .outerRadius(radius);
+
+        // Create SVG for pie chart
+        const tooltipSvg = this.tooltip
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        // Add pie chart group
+        const pieGroup = tooltipSvg.append("g")
+            .attr("transform", `translate(${radius},${height/2})`);
+
+        // Determine color scale based on top/bottom
+        const colorScale = isTop ? this.colorTop : this.colorBottom;
+
+        // Create pie chart segments
+        pieGroup.selectAll("path")
+            .data(pie(nonZeroData))
+            .join("path")
+            .attr("d", arc)
+            .attr("fill", (d, i) => colorScale(classifications[i]))
+            .attr("stroke", "white")
+            .style("stroke-width", "1px");
+
+        // Add legend
+        const legend = tooltipSvg.append("g")
+            .attr("transform", `translate(${2*radius + 20}, 10)`);
+
+        legend.selectAll("rect")
+            .data(classifications)
+            .join("rect")
+            .attr("y", (d, i) => i * 20)
+            .attr("width", 10)
+            .attr("height", 10)
+            .attr("fill", d => colorScale(d));
+
+        legend.selectAll("text")
+            .data(classifications)
+            .join("text")
+            .attr("x", 15)
+            .attr("y", (d, i) => i * 20 + 9)
+            .text(d => d.length > 15 ? d.substring(0, 15) + "..." : d)
+            .style("font-size", "12px");
+
         return this;
     }
 
@@ -231,13 +312,31 @@ class B2BHistoD3 {
         topBars.selectAll(".top-bar")
             .data(d => d)
             .join(
-                enter => {
-                    const s = enter.append("rect")
-                        .attr("class", "top-bar");
-                    this.updateSquareTop(s, xScale);
-                },
-                update => this.updateSquareTop(update, xScale),
-                exit => exit.remove()
+            enter => {
+                const s = enter.append("rect")
+                .attr("class", "top-bar")
+                .on("mouseover", (event, d) => {
+                    const mouseX = this.xScale.invert(d3.pointer(event)[0]);
+                    const timeIndex = this.parsedTimes.findIndex((t, i) => {
+                        const nextT = i < this.parsedTimes.length - 1 ? this.parsedTimes[i + 1] : new Date(t.getTime() + (t.getTime() - this.parsedTimes[i-1].getTime()));
+                        return mouseX >= t && mouseX < nextT;
+                    });
+
+                    const barData = this.data.content[timeIndex].top;
+
+                    this.createTooltipPieChart(barData, true);
+                    this.tooltip
+                    .style("visibility", "visible")
+                    .style("left", `${event.pageX + 10}px`)
+                    .style("top", `${event.pageY - 10}px`);
+                })
+                .on("mouseout", () => {
+                    this.tooltip.style("visibility", "hidden");
+                });
+                this.updateSquareTop(s, xScale);
+            },
+            update => this.updateSquareTop(update, xScale),
+            exit => exit.remove()
             );
 
         // Render bottom bars
@@ -255,13 +354,30 @@ class B2BHistoD3 {
         bottomBars.selectAll(".bottom-bar")
             .data(d => d)
             .join(
-                enter => {
-                    const s = enter.append("rect")
-                        .attr("class", "bottom-bar");
-                    this.updateSquareBottom(s, xScale);
-                },
-                update => this.updateSquareBottom(update, xScale),
-                exit => exit.remove()
+            enter => {
+                const s = enter.append("rect")
+                .attr("class", "bottom-bar")
+                .on("mouseover", (event, d) => {
+                    const mouseX = this.xScale.invert(d3.pointer(event)[0]);
+                    const timeIndex = this.parsedTimes.findIndex((t, i) => {
+                    const nextT = i < this.parsedTimes.length - 1 ? this.parsedTimes[i + 1] : new Date(t.getTime() + (t.getTime() - this.parsedTimes[i-1].getTime()));
+                    return mouseX >= t && mouseX < nextT;
+                    });
+                    const barData = this.data.content[timeIndex].bottom;
+
+                    this.createTooltipPieChart(barData, false);
+                    this.tooltip
+                    .style("visibility", "visible")
+                    .style("left", `${event.pageX + 10}px`)
+                    .style("top", `${event.pageY - 10}px`);
+                })
+                .on("mouseout", () => {
+                    this.tooltip.style("visibility", "hidden");
+                });
+                this.updateSquareBottom(s, xScale);
+            },
+            update => this.updateSquareBottom(update, xScale),
+            exit => exit.remove()
             );
 
         return this;
