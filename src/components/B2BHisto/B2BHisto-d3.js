@@ -410,15 +410,19 @@ class B2BHistoD3 {
             .domain([-1, 1])
             .range([this.height, 0]);
 
-        // Color scales
+        // Use interpolateRainbow for both top and bottom color scales
         this.colorTop = d3.scaleOrdinal()
             .domain(data.classifications.top)
-            .range(d3.schemeCategory10);
+            .range(data.classifications.top.map((_, i) => 
+                d3.interpolateRainbow(i / data.classifications.top.length)
+            ));
 
         this.colorBottom = d3.scaleOrdinal()
             .domain(data.classifications.bottom)
-            .range(d3.schemeCategory10);
-
+            .range(data.classifications.bottom.map((_, i) => 
+                d3.interpolateRainbow(i / data.classifications.bottom.length)
+            ));
+            
         // Store parsed times for potential reuse
         this.parsedTimes = parsedTimes.slice(0, -1);
 
