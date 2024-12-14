@@ -5,6 +5,7 @@ import { setResized } from './redux/GlobalSlice';
 import HeatMapContainer from './components/HeatMap/HeatMapContainer';
 import TimeSeriesContainer from './components/TimeSeries/TimeSeriesContainer';
 import B2BHistoContainer from './components/B2BHisto/B2BHistoContainer';
+import HistoTimeLineContainer from './components/HistoTimeLine/HistoTimeLineContainer';
 import { setSelectedValue } from './redux/SelectionSlice';
 
 
@@ -114,7 +115,7 @@ function App() {
                     </form>
                 </div>
             </div>
-
+            <HistoTimeLineContainer />
             <B2BHistoContainer />
         </div>
     );

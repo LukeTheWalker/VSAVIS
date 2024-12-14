@@ -1,0 +1,31 @@
+.HistoTimeLineDivContainer{
+    height: 100%;
+    width: 100%;
+}
+
+.axisLabel {
+    padding: 40px; /* Increase padding to enlarge the clickable area */
+    cursor: grab;  /* Change cursor to indicate draggable item */
+}
+
+.axisLabel:active {
+    cursor: grabbing; /* Change cursor to indicate dragging */
+}
+
+.axisLabel {
+    font-family: 'Roboto', sans-serif;
+    fill: #F2F2F2;
+}
+
+.axisLabelBackground {
+    fill: #490D14; 
+    opacity: 0.5;
+}
+
+.axisLine .tick:nth-child(-n+3) {
+    display: none;
+}
+
+.tick  {
+    font-family: 'Roboto', sans-serif;
+}
