@@ -23,7 +23,7 @@ function PieChartContainer() {
 
     const getContainerSize = (index) => {
         if (divPieChartContainerRefs.current[index]) {
-            const width = window.innerWidth * .1;
+            const width = window.innerWidth * .12;
             // const height = window.innerHeight * 0.4
             // const minSize = Math.min(width, height);
             return {
@@ -51,7 +51,6 @@ function PieChartContainer() {
         console.log("PieChartContainer mounting");
         // Create a pie chart for each item in the data (without using map)
         for (let i = 0; i < data.length; i++) {
-            const item = data[i];
             const pieChartD3 = new PieChartD3(divPieChartContainerRefs.current[i]);
             pieChartD3.create({ size: getContainerSize(i) });
             pieChartD3Refs.current[i] = pieChartD3;
@@ -61,7 +60,7 @@ function PieChartContainer() {
             console.log("PieChartContainer unmounting");
             pieChartD3Refs.current.forEach((pieChart) => pieChart.clear());
         };
-    }, [resized, data]);
+    }, [data]);
 
     // Update pie charts with the processed data
     useEffect(() => {
@@ -71,7 +70,7 @@ function PieChartContainer() {
             if (item && divPieChartContainerRefs.current[i]) {
                 const processedData = preprocessData(item);
                 console.log(`Processed data for chart ${i}:`, processedData);
-                pieChartD3Refs.current[i].update(processedData, keys[i]);
+                pieChartD3Refs.current[i].update(processedData, keys[i], getContainerSize(i));
             }
         }
     }, [data]);
