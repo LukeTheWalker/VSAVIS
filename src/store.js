@@ -4,6 +4,7 @@ import globalReducer from './redux/GlobalSlice'
 import b2bHistoReducer from './redux/B2BHistoSlice'
 import selectSliceReducer from './redux/SelectionSlice'
 import histoTimeLineReducer from './redux/HistoTimeLineSlice'
+import PieChartReducer from './redux/PieChartSlice'
 
 export default configureStore({
   reducer: {
@@ -11,6 +12,7 @@ export default configureStore({
     global: globalReducer,
     b2bhist: b2bHistoReducer,
     selection: selectSliceReducer,
-    histoTimeline: histoTimeLineReducer 
+    histoTimeline: histoTimeLineReducer,
+    piechart: PieChartReducer
     }
 })
