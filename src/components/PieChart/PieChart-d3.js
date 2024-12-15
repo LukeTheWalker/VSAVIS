@@ -10,11 +10,12 @@ class PieChartD3 {
 
     create({ size }) {
         const { width, height } = size;
-        const svgWidth = width * 1.5; // Increase SVG size by 1.5 times (or adjust as needed)
-        const svgHeight = height * 1.5; // Same for height
+        const svgWidth = width ; // Increase SVG size by 1.5 times (or adjust as needed)
+        const svgHeight = height ; // Same for height
 
         // Set the radius to 70% of the SVG size
-        this.radius = Math.min(svgWidth, svgHeight) * 0.35; // 70% of the SVG width/height
+        this.radius = Math.min(svgWidth/2, svgHeight/2)*0.9; // 70% of the SVG width/height
+        console.log("this.radius", this.radius);
 
         // Create the SVG with increased size
         this.svg = d3.select(this.container)
@@ -76,7 +77,7 @@ class PieChartD3 {
             enterGroup.append('text')
                 .attr('class', 'center-label-text')
                 .attr('text-anchor', 'middle')
-                .style('font-size', '18px')
+                .style('font-size', '12px')
                 .style('font-weight', 'bold')
                 .style('fill', 'black');
     
@@ -122,7 +123,7 @@ class PieChartD3 {
         labelGroups.append('text')
             .attr('class', 'label-text')
             .attr('text-anchor', d => outerArc.centroid(d)[0] > 0 ? 'start' : 'end')
-            .style('font-size', '18px') // Updated font size
+            .style('font-size', '12px') // Updated font size
             .style('font-weight', 'bold')
             .style('fill', 'black');
     
@@ -131,14 +132,29 @@ class PieChartD3 {
             .text(d => d.data.label)
             .attr('transform', d => {
                 const [x, y] = outerArc.centroid(d);
-                const adjustedX = Math.max(
-                    -containerSize / 2,
-                    Math.min(containerSize / 2, x)
+                let adjustedX = Math.max(
+                    -containerSize / 2 +25,
+                    Math.min(containerSize / 2-25, x)
                 );
-                const adjustedY = Math.max(
+                let adjustedY = Math.max(
                     -containerSize / 2,
                     Math.min(containerSize / 2, y)
                 );
+                if(d.data.label === "teardown"){
+                    adjustedY = adjustedY - 20;   
+                }
+                if(d.data.label === "built"){
+                    adjustedY = adjustedY + 20;   
+                }
+                if(d.data.label === "deny"){
+                    adjustedY = adjustedY - 20;   
+                }
+                if(d.data.label === "deny by acl"){
+                    adjustedY = adjustedY - 15;   
+                }
+                if(d.data.label === "deny by acl"){
+                    adjustedX = adjustedX + 15;   
+                }
                 return `translate(${adjustedX}, ${adjustedY})`;
             });
     
@@ -146,14 +162,29 @@ class PieChartD3 {
             .select('.label-bg')
             .attr('transform', d => {
                 const [x, y] = outerArc.centroid(d);
-                const adjustedX = Math.max(
-                    -containerSize / 2,
-                    Math.min(containerSize / 2, x)
+                let adjustedX = Math.max(
+                    -containerSize / 2 +25,
+                    Math.min(containerSize / 2-25, x)
                 );
-                const adjustedY = Math.max(
+                let adjustedY = Math.max(
                     -containerSize / 2,
                     Math.min(containerSize / 2, y)
                 );
+                if(d.data.label === "teardown"){
+                    adjustedY = adjustedY - 20;   
+                }
+                if(d.data.label === "built"){
+                    adjustedY = adjustedY + 20;   
+                }
+                if(d.data.label === "deny"){
+                    adjustedY = adjustedY - 20;   
+                }
+                if(d.data.label === "deny by acl"){
+                    adjustedY = adjustedY - 15;   
+                }
+                if(d.data.label === "deny by acl"){
+                    adjustedX = adjustedX + 15;   
+                }
                 return `translate(${adjustedX}, ${adjustedY})`;
             })
             .each(function (d) {
