@@ -399,19 +399,38 @@ class B2BHistoD3 {
                 const s = enter.append("rect")
                 .attr("class", "top-bar")
                 .on("mouseover", (event, d) => {
-                    const mouseX = this.xScale.invert(d3.pointer(event)[0]);
+                    const mouseX = d3.pointer(event)[0];
+                    const mouseX_percent = mouseX / this.width;
+
                     const timeIndex = this.parsedTimes.findIndex((t, i) => {
-                        const nextT = i < this.parsedTimes.length - 1 ? this.parsedTimes[i + 1] : new Date(t.getTime() + (t.getTime() - this.parsedTimes[i-1].getTime()));
-                        return mouseX > t && mouseX < nextT;
+                        const nextT = i < this.parsedTimes.length - 1 ? this.parsedTimes[i + 1] : this.xScale.invert(this.width);
+                        return this.xScale.invert(mouseX) > t && this.xScale.invert(mouseX) < nextT;
                     });
 
                     const barData = this.data.content[timeIndex].top;
 
                     this.createTooltipPieChart(barData, true);
+                    
+                    // Tooltip positioning logic
+                    const tooltipWidth = 250; // From the createTooltipPieChart method
+                    const tooltipHeight = 120; // Estimate based on previous implementation
+
+                    let tooltipX, tooltipY;
+                    if (mouseX_percent > 0.75) {
+                        // Position tooltip to the left of the mouse
+                        tooltipX = event.pageX - tooltipWidth - 20;
+                    } else {
+                        // Position tooltip to the right of the mouse
+                        tooltipX = event.pageX + 10;
+                    }
+
+                    // Vertically center the tooltip relative to the mouse
+                    tooltipY = event.pageY;
+
                     this.tooltip
                     .style("visibility", "visible")
-                    .style("left", `${event.pageX + 10}px`)
-                    .style("top", `${event.pageY - 10}px`);
+                    .style("left", `${tooltipX}px`)
+                    .style("top", `${tooltipY}px`);
                 })
                 .on("mouseout", () => {
                     this.tooltip.style("visibility", "hidden");
@@ -422,7 +441,7 @@ class B2BHistoD3 {
             exit => exit.remove()
             );
 
-        // Render bottom bars
+        // Similar modifications for bottom bars
         const bottomBars = this.bottomBarsG.selectAll(".bottom-bar-group")
             .data(bottomStackedData)
             .join(
@@ -441,18 +460,38 @@ class B2BHistoD3 {
                 const s = enter.append("rect")
                 .attr("class", "bottom-bar")
                 .on("mouseover", (event, d) => {
-                    const mouseX = this.xScale.invert(d3.pointer(event)[0]);
+                    const mouseX = d3.pointer(event)[0];
+                    const mouseX_percent = mouseX / this.width;
+
                     const timeIndex = this.parsedTimes.findIndex((t, i) => {
-                        const nextT = i < this.parsedTimes.length - 1 ? this.parsedTimes[i + 1] : new Date(t.getTime() + (t.getTime() - this.parsedTimes[i-1].getTime()));
-                        return mouseX >= t && mouseX < nextT;
+                        const nextT = i < this.parsedTimes.length - 1 ? this.parsedTimes[i + 1] : this.xScale.invert(this.width);
+                        return this.xScale.invert(mouseX) > t && this.xScale.invert(mouseX) < nextT;
                     });
+
                     const barData = this.data.content[timeIndex].bottom;
 
                     this.createTooltipPieChart(barData, false);
+                    
+                    // Tooltip positioning logic
+                    const tooltipWidth = 250; // From the createTooltipPieChart method
+                    const tooltipHeight = 120; // Estimate based on previous implementation
+
+                    let tooltipX, tooltipY;
+                    if (mouseX_percent > 0.75) {
+                        // Position tooltip to the left of the mouse
+                        tooltipX = event.pageX - tooltipWidth - 20;
+                    } else {
+                        // Position tooltip to the right of the mouse
+                        tooltipX = event.pageX + 10;
+                    }
+
+                    // Vertically center the tooltip relative to the mouse
+                    tooltipY = event.pageY;
+
                     this.tooltip
                     .style("visibility", "visible")
-                    .style("left", `${event.pageX + 10}px`)
-                    .style("top", `${event.pageY - 10}px`);
+                    .style("left", `${tooltipX}px`)
+                    .style("top", `${tooltipY}px`);
                 })
                 .on("mouseout", () => {
                     this.tooltip.style("visibility", "hidden");
@@ -464,6 +503,7 @@ class B2BHistoD3 {
             );
 
         return this;
+
     }
 
     setupScales = function(data) {

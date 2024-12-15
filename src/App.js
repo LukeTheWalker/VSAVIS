@@ -9,7 +9,6 @@ import HistoTimeLineContainer from './components/HistoTimeLine/HistoTimeLineCont
 import { setSelectedValue } from './redux/SelectionSlice';
 import PieChartContainer from './components/PieChart/PieChartContatiner';
 
-
 function App() {
     const dispatch = useDispatch();
     const resizedRef = useRef(useSelector(state => state.global.resized));
@@ -119,11 +118,29 @@ function App() {
             </div>
             <HistoTimeLineContainer />
             <B2BHistoContainer />
-            <div className="HeatAndPieContainer">
-                <HeatMapContainer />
-                <PieChartContainer />
+            <hr className="separator" />
+            <br />
+            <div className="HeatAndPieContainer w-full grid grid-cols-2 gap-4">
+                <div className="border rounded-lg shadow-sm">
+                    <div className="p-4 border-b">
+                    <h2 className="text-xl font-semibold">Heatmap</h2>
+                    </div>
+                    <div className="p-4">
+                    <HeatMapContainer />
+                    </div>
+                </div>
+                
+                <div className="border rounded-lg shadow-sm">
+                    <div className="p-4 border-b">
+                    <h2 className="text-xl font-semibold">Pie Chart</h2>
+                    </div>
+                    <div className="p-4">
+                    <PieChartContainer />
+                    </div>
+                </div>
             </div>
         </div>
+
     );
 }
 
