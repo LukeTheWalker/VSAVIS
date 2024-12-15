@@ -74,7 +74,7 @@ class pieChartD3 {
                 .attr("d", self.arc)
                 // .attr("fill", (d, i) => self.colorScale(this.sliceNames[this.sliceNames.indexOf(d)]))
                 .attr("fill", (d, i) => {
-                    console.log(name, "-->", self.sliceNames.indexOf(name));
+                    const name = Object.keys(d.data)[0];
                     return self.colorScale(self.sliceNames.indexOf(name));
                 })
                 .attr("opacity", 0.7)
