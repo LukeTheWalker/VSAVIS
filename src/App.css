@@ -112,3 +112,13 @@
     flex-direction: column;
   }
 }
+
+/* Alternative approach if you want more explicit height control */
+.HeatAndPieContainer {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    grid-auto-rows: minmax(300px, auto); /* Ensures minimum height, can grow as needed */
+  }
+  

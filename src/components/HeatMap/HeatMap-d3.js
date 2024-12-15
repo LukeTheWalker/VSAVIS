@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
 
 class HeatMapD3 {
-    margin = { top: 10, right: 80, bottom: 40, left: 150 };
+    margin = { top: 10, right: 80, bottom: 60, left: 150 };
     size;
     height;
     width;
@@ -85,7 +85,8 @@ class HeatMapD3 {
             .attr("y", this.legendWidth + 50)
             .attr("x", -this.height / 2)
             .attr("text-anchor", "middle")
-            .text("Value");
+            .text("Value")
+            
     }
 
     renderHeatMap = function (visData) {
@@ -125,7 +126,12 @@ class HeatMapD3 {
         this.svgG.append("g")
             .attr("class", "x-axis")
             .attr("transform", `translate(0, ${this.height})`)
-            .call(d3.axisBottom(xScale));
+            .call(d3.axisBottom(xScale))
+            .selectAll("text")
+            .style("text-anchor", "start")
+            .attr("dx", ".5em")
+            .attr("dy", ".15em")
+            .attr("transform", "rotate(45)")
 
         this.svgG.append("g")
             .attr("class", "y-axis")
@@ -148,42 +154,42 @@ class HeatMapD3 {
                     .attr("fill", d => this.colorScale(d3.sum(d.values))); // Adjust color as needed
                 
                 // Append background rect for text
-                cellGroup.append("rect")
-                    .attr("class", "heatmap-cell-text-bg")
-                    .attr("x", d => xScale(d.source) + xScale.bandwidth() / 2)
-                    .attr("y", d => yScale(d.destination) + yScale.bandwidth() / 2)
-                    .attr("width", function(d) {
-                        const text = d3.sum(d.values).toString();
-                        return text.length * 8 + 10; // Adjust width based on text length
-                    })
-                    .attr("height", 20) // Adjust height as needed
-                    .attr("rx", 5) // Rounded corners
-                    .attr("ry", 5) // Rounded corners
-                    .style("fill", "white")
-                    .style("opacity", 0.8)
-                    .attr("transform", function(d) {
-                        const text = d3.sum(d.values).toString();
-                        const width = text.length * 8;
-                        return `translate(${-width / 2 - 5}, -10)`; // Center the background rect
-                    });
+                // cellGroup.append("rect")
+                //     .attr("class", "heatmap-cell-text-bg")
+                //     .attr("x", d => xScale(d.source) + xScale.bandwidth() / 2)
+                //     .attr("y", d => yScale(d.destination) + yScale.bandwidth() / 2)
+                //     .attr("width", function(d) {
+                //         const text = d3.sum(d.values).toString();
+                //         return text.length * 8 + 10; // Adjust width based on text length
+                //     })
+                //     .attr("height", 20) // Adjust height as needed
+                //     .attr("rx", 5) // Rounded corners
+                //     .attr("ry", 5) // Rounded corners
+                //     .style("fill", "white")
+                //     .style("opacity", 0.8)
+                //     .attr("transform", function(d) {
+                //         const text = d3.sum(d.values).toString();
+                //         const width = text.length * 8;
+                //         return `translate(${-width / 2 - 5}, -10)`; // Center the background rect
+                //     });
 
-                // Append text
-                cellGroup.append("text")
-                    .attr("class", "heatmap-cell-text")
-                    .attr("x", d => xScale(d.source) + xScale.bandwidth() / 2)
-                    .attr("y", d => yScale(d.destination) + yScale.bandwidth() / 2)
-                    .attr("dy", "0.35em") // Center vertically
-                    .attr("text-anchor", "middle") // Center horizontally
-                    .text(d => d3.sum(d.values)) // Replace this with your desired value
-                    .style("fill", "black") // Adjust color as needed
-                    .style("font-size", "12px"); // Adjust font size as needed
+                // // Append text
+                // cellGroup.append("text")
+                //     .attr("class", "heatmap-cell-text")
+                //     .attr("x", d => xScale(d.source) + xScale.bandwidth() / 2)
+                //     .attr("y", d => yScale(d.destination) + yScale.bandwidth() / 2)
+                //     .attr("dy", "0.35em") // Center vertically
+                //     .attr("text-anchor", "middle") // Center horizontally
+                //     .text(d => d3.sum(d.values)) // Replace this with your desired value
+                //     .style("fill", "black") // Adjust color as needed
+                //     .style("font-size", "12px"); // Adjust font size as needed
             },
             update => {
                 update.select("rect")
                     .attr("fill", d => this.colorScale(d3.sum(d.values)));
                 
-                update.select("text")
-                    .text(d => d3.sum(d.values));
+                // update.select("text")
+                //     .text(d => d3.sum(d.values));
             },
             exit => exit.remove()
         );

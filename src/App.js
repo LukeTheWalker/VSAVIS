@@ -45,7 +45,6 @@ function App() {
 
     return (
         <div className="App">
-            <HeatMapContainer />
             <TimeSeriesContainer />
 
             <div className="dropdown-grid">
@@ -120,7 +119,10 @@ function App() {
             </div>
             <HistoTimeLineContainer />
             <B2BHistoContainer />
-            <PieChartContainer />
+            <div className="HeatAndPieContainer">
+                <HeatMapContainer />
+                <PieChartContainer />
+            </div>
         </div>
     );
 }
