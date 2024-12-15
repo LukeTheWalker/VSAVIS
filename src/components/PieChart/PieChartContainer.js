@@ -28,7 +28,6 @@ function PieChartContainer() {
 
     // Did mount - called once the component mounts
     useEffect(() => {
-        console.log("PieChartContainer useEffect for mounting");
         
         // Correct instantiation with capital 'P'
         const pieChartD3 = new PieChartD3(divContainerRef.current);
@@ -37,7 +36,6 @@ function PieChartContainer() {
 
         return () => {
             // Did unmount, the return function is called once the component is removed from the screen
-            console.log("PieChartContainer useEffect [] return function, called when the component did unmount...");
             const pieChartD3 = pieChartD3Ref.current;
             pieChartD3.clear();
         }
@@ -45,7 +43,6 @@ function PieChartContainer() {
 
     // Did update, called each time dependencies change
     useEffect(() => {
-        console.log("PieChartContainer useEffect with dependency [data, resized, dispatch], called each time data changes...");
         
         const pieChartD3 = pieChartD3Ref.current;
 

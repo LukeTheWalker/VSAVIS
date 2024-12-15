@@ -11,6 +11,9 @@ function HeatMapContainer() {
     const dispatch = useDispatch();
 
     const resized = useSelector(state => state.global.resized);
+    const selectedClass = useSelector(state => state.selection.dropdownHeat);
+    const selectedHeatMapStart = useSelector(state => state.selection.heatmapStart);
+    const selectedHeatMapEnd = useSelector(state => state.selection.heatmapEnd);
 
     const divContainerRef = useRef(null);
     const heatmapD3Ref = useRef(null)
@@ -20,24 +23,28 @@ function HeatMapContainer() {
         let height;
         if (divContainerRef.current !== undefined) {
             width=divContainerRef.current.offsetWidth;
-            height= 500;
+            height= 600;
         }
         return { width: width, height: height };
     }
 
     useEffect(() => 
-        { dispatch(getHeatMapData()); }
-    , [dispatch]);
+        { 
+            dispatch(getHeatMapData({
+                selectedClass: selectedClass,
+                start: selectedHeatMapStart,
+                end: selectedHeatMapEnd
+            })); }
+    , [dispatch, selectedClass, selectedHeatMapStart, selectedHeatMapEnd]);
+
 
     // did mount called once the component did mount
     useEffect(() => {
-        console.log("HeatMapContainer useEffect for mounting");
         const heatmapD3 = new HeatMapD3(divContainerRef.current);
         heatmapD3.create({ size: getCharSize() });
         heatmapD3Ref.current = heatmapD3;
         return () => {
             // did unmout, the return function is called once the component did unmount (removed for the screen)
-            console.log("HeatMapContainer useEffect [] return function, called when the component did unmount...");
             const heatmapD3 = heatmapD3Ref.current;
             heatmapD3.clear()
         }
@@ -45,9 +52,7 @@ function HeatMapContainer() {
 
     // did update, called each time dependencies change, dispatch remain stable over component cycles
     useEffect(() => {
-        console.log("HeatMapContainer useEffect with dependency [data, resized, dispatch], called each time matrixData changes...");
         const heatmapD3 = heatmapD3Ref.current;
-
         heatmapD3.renderHeatMap(data);
     }, [data, resized, dispatch]);// if dependencies, useEffect is called after each data update, in our case only matrixData changes.
 

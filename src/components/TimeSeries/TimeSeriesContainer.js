@@ -30,13 +30,11 @@ function TimeSeriesContainer() {
 
     // did mount called once the component did mount
     useEffect(() => {
-        console.log("TimeSeriesContainer useEffect for mounting");
         const timeSerieD3 = new TimeSeriesD3(divTimeSeriesContainerRef.current);
         timeSerieD3.create({ size: getCharSize() });
         timeSerieD3Ref.current = timeSerieD3;
         return () => {
             // did unmout, the return function is called once the component did unmount (removed for the screen)
-            console.log("TimeSeriesContainer useEffect [] return function, called when the component did unmount...");
             const timeSerieD3 = timeSerieD3Ref.current;
             timeSerieD3.clear()
         }
@@ -44,7 +42,6 @@ function TimeSeriesContainer() {
 
     // did update, called each time dependencies change, dispatch remain stable over component cycles
     useEffect(() => {
-        console.log("TimeSeriesContainer useEffect with dependency [data, dispatch], called each time matrixData changes...");
         const timeSerieD3 = timeSerieD3Ref.current;
 
         timeSerieD3.renderTimeSeries(data);

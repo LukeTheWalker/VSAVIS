@@ -434,6 +434,16 @@ class B2BHistoD3 {
                 })
                 .on("mouseout", () => {
                     this.tooltip.style("visibility", "hidden");
+                })
+                .on("click", (event, d) => {
+                    const mouseX = this.xScale.invert(d3.pointer(event)[0]);
+                    const timeIndex = this.parsedTimes.findIndex((t, i) => {
+                        const nextT = i < this.parsedTimes.length - 1 ? this.parsedTimes[i + 1] : new Date(t.getTime() + (t.getTime() - this.parsedTimes[i-1].getTime()));
+                        return mouseX > t && mouseX < nextT;
+                    });
+
+                    this.behavior.timelineSelection({start: this.data.times[timeIndex], end: this.data.times[timeIndex + 1]});
+                    
                 });
                 this.updateSquareTop(s, xScale);
             },
@@ -495,7 +505,18 @@ class B2BHistoD3 {
                 })
                 .on("mouseout", () => {
                     this.tooltip.style("visibility", "hidden");
-                });
+                })
+                .on("click", (event, d) => {
+                    const mouseX = this.xScale.invert(d3.pointer(event)[0]);
+                    const timeIndex = this.parsedTimes.findIndex((t, i) => {
+                        const nextT = i < this.parsedTimes.length - 1 ? this.parsedTimes[i + 1] : new Date(t.getTime() + (t.getTime() - this.parsedTimes[i-1].getTime()));
+                        return mouseX >= t && mouseX < nextT;
+                    });
+
+                    this.behavior.timelineSelection({start: this.data.times[timeIndex], end: this.data.times[timeIndex + 1]});
+                })
+                ;
+
                 this.updateSquareBottom(s, xScale);
             },
             update => this.updateSquareBottom(update, xScale),
@@ -620,8 +641,10 @@ class B2BHistoD3 {
         return this;
     }
 
-    renderB2BHisto = function (data) {
+    renderB2BHisto = function (data, behavior) {
         if (!data || !data.content || !data.content.length) return this;
+
+        this.behavior = behavior;
 
         this.resetClassFilter(data);
 

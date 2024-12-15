@@ -125,7 +125,7 @@ class HistoTimeLineD3 {
 
         const area = d3.area()
             .x(d => this.xScale(new Date(d.time)))
-            .y0(this.height-3)
+            .y0(this.height)
             .y1(d => this.yScale(d.count));
 
         this.allDotsG.selectAll(".area").remove();
@@ -201,7 +201,6 @@ class HistoTimeLineD3 {
 
         const timeFormat = d3.timeFormat('%Y-%m-%d %H:%M:%S');
 
-        console.log("Selected time range", timeFormat(startTime), timeFormat(endTime));
 
         this.behaviors.timeLineSelection({
             start: timeFormat(startTime),

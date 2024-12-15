@@ -5,6 +5,8 @@ import { getB2BHistoData } from '../../redux/B2BHistoSlice'
 
 
 import B2BHistoD3 from './B2BHisto-d3'
+import { getHeatMapData } from '../../redux/HeatMapSlice';
+import { setHeatmapChoice } from '../../redux/SelectionSlice';
 
 function B2BHistoContainer() {
     const data = useSelector(state => state.b2bhist.data)
@@ -14,6 +16,9 @@ function B2BHistoContainer() {
     const selectedValueModeFIR = useSelector(state => state.selection.dropdownModeFIR);
     const selectedValueNumBins = useSelector(state => state.selection.numBins);
     const selectedInterval = useSelector(state => state.histoTimeline.selectedInterval);
+
+    const selectedHeatmapClass = useSelector(state => state.selection.dropdownHeat);
+
     
     const dispatch = useDispatch();
 
@@ -36,13 +41,11 @@ function B2BHistoContainer() {
 
     // did mount called once the component did mount
     useEffect(() => {
-        console.log("B2BHistoContainer useEffect for mounting");
         const b2BHistoD3 = new B2BHistoD3(divB2BHistoContainerRef.current);
         b2BHistoD3.create({ size: getCharSize() });
         b2BHistoD3Ref.current = b2BHistoD3;
         return () => {
             // did unmout, the return function is called once the component did unmount (removed for the screen)
-            console.log("B2BHistoContainer useEffect [] return function, called when the component did unmount...");
             const b2BHistoD3 = b2BHistoD3Ref.current;
             b2BHistoD3.clear()
         }
@@ -50,15 +53,21 @@ function B2BHistoContainer() {
 
     // did update, called each time dependencies change, dispatch remain stable over component cycles
     useEffect(() => {
-        console.log("B2BHistoContainer useEffect with dependency [data, dispatch], called each time matrixData changes...");
         const b2BHistoD3 = b2BHistoD3Ref.current;
+        const behavior = {
+            timelineSelection: (interval) => {
+                dispatch(setHeatmapChoice({ 
+                    start: new Date(interval.start).toISOString().slice(0, 19).replace('T', ' '),
+                    end: new Date(interval.end).toISOString().slice(0, 19).replace('T', ' ')
+                 }));
+            }
+        };
 
-        b2BHistoD3.renderB2BHisto(data);
+        b2BHistoD3.renderB2BHisto(data, behavior);
     }, [data, resized, dispatch]);// if dependencies, useEffect is called after each data update, in our case only matrixData changes.
 
     // did update, called each time dependencies change, dispatch remain stable over component cycles
     useEffect(() => {
-        console.log("Doing a new fetch with the following parameters: ", selectedValueIDS, selectedValueFirewall, selectedValueModeFIR, selectedValueNumBins, selectedInterval);
         dispatch(
             getB2BHistoData({
                 fir: selectedValueFirewall,

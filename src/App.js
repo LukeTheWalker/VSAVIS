@@ -41,6 +41,7 @@ function App() {
     const selectedValueFirewall = useSelector(state => state.selection.dropdownFirewall);
     const selectedValueModeFIR = useSelector(state => state.selection.dropdownModeFIR);
     const selectedValueNumBins = useSelector(state => state.selection.numBins);
+    const selectedValueHeat = useSelector(state => state.selection.dropdownHeat);
 
     return (
         <div className="App">
@@ -75,6 +76,23 @@ function App() {
                         <option value="count">Count</option>
                         <option value="log">Log</option>
                         <option value="unique">Unique</option>
+                    </select>
+
+                    <label htmlFor="dropdownHeat" className="dropdown-label">Choose an attribute for the HeatMap:</label>
+                    <select
+                        id="dropdownHeat"
+                        className="dropdown-select"
+                        onChange={(e) => handleChange('dropdownHeat', e)}
+                        defaultValue={selectedValueHeat}
+                    >
+                        <option value="classification">IDS/Classification</option>
+                        <option value="priority">IDS/Priority</option>
+                        <option value="label">IDS/Label</option>
+                        <option value="Syslog priority">FIR/Syslog priority</option>
+                        <option value="Operation">FIR/Operation</option>
+                        <option value="Protocol">FIR/Protocol</option>
+                        <option value="Destination service">FIR/Destination service</option>
+                        <option value="Direction">FIR/Direction</option>
                     </select>
                 </div>
 

@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from 'react-redux';
 
 import HistoTimeLineD3 from './HistoTimeLine-d3'
 import { getHistoTimeLineData, selectTimeLine } from '../../redux/HistoTimeLineSlice';
+import { setHeatmapChoice } from '../../redux/SelectionSlice';
 
 
 function HistoTimeLineContainer() {
@@ -54,6 +55,16 @@ function HistoTimeLineContainer() {
                 dispatch(selectTimeLine({
                     start: interval.start,
                     end: interval.end
+                }));
+
+                // If the start and end are the same, then pass nothing
+                if (interval.start === interval.end) {
+                    dispatch(setHeatmapChoice({}));
+                    return;
+                }
+                dispatch(setHeatmapChoice({
+                    start: new Date(interval.start).toISOString().slice(0, 19).replace('T', ' '),
+                    end: new Date(interval.end).toISOString().slice(0, 19).replace('T', ' ')
                 }));
                 return;
             }
