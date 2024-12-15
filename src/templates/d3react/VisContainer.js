@@ -12,7 +12,6 @@ function VisContainer(){
 
     // every time the component re-render
     useEffect(()=>{
-        console.log("VisContainer useEffect (called each time matrix re-renders)");
     }); // if no dependencies, useEffect is called at each re-render
 
     const divContainerRef=useRef(null);
@@ -35,13 +34,11 @@ function VisContainer(){
 
     // did mount called once the component did mount
     useEffect(()=>{
-        console.log("VisContainer useEffect [] called once the component did mount");
         const visD3 = new VisD3(divContainerRef.current);
         visD3.create({size:getCharSize()});
         visD3Ref.current = visD3;
         return ()=>{
             // did unmout, the return function is called once the component did unmount (removed for the screen)
-            console.log("VisContainer useEffect [] return function, called when the component did unmount...");
             const visD3 = visD3Ref.current;
             visD3.clear()
         }
@@ -49,7 +46,6 @@ function VisContainer(){
 
     // did update, called each time dependencies change, dispatch remain stable over component cycles
     useEffect(()=>{
-        console.log("VisContainer useEffect with dependency [visData,dispatch], called each time visData changes...");
         const visD3 = visD3Ref.current;
 
         const handleOnEvent1 = function(payload){
