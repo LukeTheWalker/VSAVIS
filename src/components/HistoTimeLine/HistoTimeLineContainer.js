@@ -1,5 +1,5 @@
 import './HistoTimeLine.css'
-import { startTransition, useEffect, useRef} from 'react';
+import { useEffect, useRef} from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 
@@ -10,7 +10,6 @@ import { getHistoTimeLineData, selectTimeLine } from '../../redux/HistoTimeLineS
 function HistoTimeLineContainer() {
 
     const data = useSelector(state => state.histoTimeline.data);
-    const selectedInterval = useSelector(state => state.histoTimeline.selectedInterval);
     const resized = useSelector(state => state.global.resized);
 
     const dispatch = useDispatch();

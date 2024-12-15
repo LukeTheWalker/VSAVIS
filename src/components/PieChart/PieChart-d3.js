@@ -1,213 +1,232 @@
 import * as d3 from 'd3';
 
-class PieChartD3 {
-    constructor(container) {
-        this.container = container;
-        this.svg = null;
-        this.radius = 0; // Radius will be calculated dynamically
-        this.color = d3.scaleOrdinal(d3.schemeCategory10);
+class pieChartD3 {
+    margin = {top: 50, right: 20, bottom: 20, left: 20}; // Adjust top margin for legend
+    size;
+    height;
+    width;
+    matSvg;
+    data;
+
+    // Circle packing specific properties
+    colorScheme = d3.schemeCategory10;
+    packLayout = d3.pack();
+    colorScale = d3.scaleOrdinal(this.colorScheme);
+
+    pie = d3.pie().value(d => d[Object.keys(d)[0]]);
+    arc = d3.arc();
+
+    sliceNames;
+
+    constructor(el) {
+        this.el = el;
     }
 
-    create({ size }) {
-        const { width, height } = size;
-        const svgWidth = width ; // Increase SVG size by 1.5 times (or adjust as needed)
-        const svgHeight = height ; // Same for height
+    create = function(config) {
+        // Set overall size
+        this.size = {width: config.size.width, height: config.size.height};
 
-        // Set the radius to 70% of the SVG size
-        this.radius = Math.min(svgWidth/2, svgHeight/2)*0.9; // 70% of the SVG width/height
-        console.log("this.radius", this.radius);
+        // Calculate effective size by subtracting margins
+        this.width = this.size.width - this.margin.left - this.margin.right;
+        this.height = this.size.height - this.margin.top - this.margin.bottom;
 
-        // Create the SVG with increased size
-        this.svg = d3.select(this.container)
-            .append('svg')
-            .attr('width', svgWidth)
-            .attr('height', svgHeight)
-            .append('g')
-            .attr('transform', `translate(${svgWidth / 2}, ${svgHeight / 2})`); // Center the pie chart
-            
+        // Configure pack layout
+        this.packLayout
+            .size([this.width, this.height])
+            .padding(3);
 
+        // Initialize SVG
+        this.matSvg = d3.select(this.el).append("svg")
+            .attr("width", this.width + this.margin.left + this.margin.right)
+            .attr("height", this.height + this.margin.top + this.margin.bottom)
+            .append("g")
+            .attr("class", "circle-packing-g")
+            .attr("transform", `translate(${this.margin.left},${this.margin.top})`);
+
+        // Add a group for the legend
+        this.matSvg.append("g")
+            .attr("class", "legend-group")
+            .attr("transform", "translate(0,-30)"); // Position above the chart
+
+        this.sliceNames = []
     }
 
-    update(data, key) {
-        if (!data || !this.svg) return;
-    
-        const pie = d3.pie().value(d => d.value);
-        const arc = d3.arc().innerRadius(0).outerRadius(this.radius);
-        const outerArc = d3.arc().innerRadius(this.radius * 1.05).outerRadius(this.radius * 1.05); // Arc for labels
-    
-        const pieData = pie(data);
-        const containerSize = this.radius * 0.9; // Approximate container size (diameter)
-    
-        // Update paths for pie slices
-        const paths = this.svg.selectAll('path').data(pieData);
-    
-        paths.enter()
-            .append('path')
-            .attr('d', arc)
-            .attr('fill', d => this.color(d.data.label))
-            .merge(paths)
-            .transition()
-            .duration(500)
-            .attr('d', arc);
-    
-        paths.exit().remove();
-    
-        // Check if there's only one category
-        const singleCategory = pieData.length === 1;
-    
-        if (singleCategory) {
-            // Remove any existing labels or rectangles
-            this.svg.selectAll('.label-group').remove();
-    
-            const centerGroup = this.svg.selectAll('.center-label-group').data(pieData);
-    
-            const enterGroup = centerGroup.enter()
-                .append('g')
-                .attr('class', 'center-label-group');
-    
-            // Append background rectangle
-            enterGroup.append('rect')
-                .attr('class', 'center-label-bg')
-                .attr('fill', 'white')
-                .attr('rx', 3) // Rounded corners
-                .attr('ry', 3)
-                .style('opacity', 0.8); // Semi-transparent background
-    
-            // Append text label
-            enterGroup.append('text')
-                .attr('class', 'center-label-text')
-                .attr('text-anchor', 'middle')
-                .style('font-size', '12px')
-                .style('font-weight', 'bold')
-                .style('fill', 'black');
-    
-            // Merge and position text and background
-            const mergedGroup = centerGroup.merge(enterGroup);
-    
-            mergedGroup.select('.center-label-text')
-                .text(d => d.data.label)
-                .attr('transform', `translate(0, 0)`); // Centered at (0, 0)
-    
-            mergedGroup.select('.center-label-bg')
-                .each(function (d) {
-                    const textElem = d3.select(this.parentNode).select('.center-label-text').node();
-                    const bbox = textElem.getBBox(); // Get bounding box of text
-                    d3.select(this)
-                        .attr('x', bbox.x - 5) // Add padding
-                        .attr('y', bbox.y - 5)
-                        .attr('width', bbox.width + 10) // Adjust size based on text
-                        .attr('height', bbox.height + 10);
-                });
-    
-            centerGroup.exit().remove();
-    
-            return; // Skip the rest of the label logic
+    // Update individual circle elements
+    updatePieChart(selection) {
+        const self = this;
+        // Set the radius for each pie chart based on the circle's radius
+        selection.each(function(d) {
+            // Configure the arc generator for this specific pie
+            self.arc.innerRadius(0)
+                .outerRadius(d.r);
+
+            // Create pie chart data from the slices
+            const pieData = self.pie(d.data.slices);
+
+            console.log(self.sliceNames);
+
+            // Create/update pie segments
+            d3.select(this)
+                .selectAll(".segment")
+                .data(pieData)
+                .join("path")
+                .attr("class", "segment")
+                .attr("d", self.arc)
+                // .attr("fill", (d, i) => self.colorScale(this.sliceNames[this.sliceNames.indexOf(d)]))
+                .attr("fill", (d, i) => {
+                    console.log(name, "-->", self.sliceNames.indexOf(name));
+                    return self.colorScale(self.sliceNames.indexOf(name));
+                })
+                .attr("opacity", 0.7)
+                .attr("stroke", "white")
+                .attr("stroke-width", 1);
+
+            // Append protocol name at the center
+            const text = d3.select(this)
+                .selectAll(".protocol-name")
+                .data([d])
+                .join("text")
+                .attr("class", "protocol-name")
+                .attr("text-anchor", "middle")
+                .attr("dy", ".35em")
+                .text(d.data.name)
+                .attr("font-size", d => Math.min(d.r / 3, 12))
+                .attr("fill", "black")
+                .attr("font-weight", "bold");
+
+            // Append background rectangle for text
+            const bbox = text.node().getBBox();
+            d3.select(this)
+                .selectAll(".text-bg")
+                .data([d])
+                .join("rect")
+                .attr("class", "text-bg")
+                .attr("x", bbox.x - 2)
+                .attr("y", bbox.y - 2)
+                .attr("width", bbox.width + 4)
+                .attr("height", bbox.height + 4)
+                .attr("fill", "white")
+                .attr("opacity", 0.8)
+                .attr("rx", 5) // Rounded corners
+                .attr("ry", 5);
+
+            text.raise();
+        });
+
+        // Position the pie charts
+        selection.attr("transform", d => `translate(${d.x},${d.y})`);
+    }
+
+    // Render the legend
+    renderLegend = function(sliceNames) {
+        const legendGroup = this.matSvg.select(".legend-group");
+
+        // Bind data to legend items
+        const legend = legendGroup.selectAll("g.legend-item")
+            .data(sliceNames)
+            .join("g")
+            .attr("class", "legend-item")
+            .attr("transform", (d, i) => `translate(${i * 100}, 0)`);
+
+        // Add colored rectangles
+        legend.selectAll("rect")
+            .data(d => [d])
+            .join("rect")
+            .attr("width", 20)
+            .attr("height", 20)
+            .attr("fill", (d, i) => this.colorScale(this.sliceNames.indexOf(d)))
+            .attr("opacity", 0.7);
+
+        // Add labels
+        legend.selectAll("text")
+            .data(d => [d])
+            .join("text")
+            .attr("x", 25)
+            .attr("y", 15)
+            .text(d => d)
+            .attr("font-size", 12)
+            .attr("fill", "black");
+
+        // Adjust legend item positions based on text width
+        let cumulativeWidth = 0;
+        legend.attr("transform", function(d, i) {
+            const textWidth = d3.select(this).select("text").node().getBBox().width;
+            const xOffset = cumulativeWidth;
+            cumulativeWidth += textWidth + 40; // 40 is the width of rect + some padding
+            return `translate(${xOffset}, 0)`;
+        });
+    }
+
+    // Main render method
+    renderPieChart = function(visData) {
+        if (!visData || (typeof visData === 'object' && !Array.isArray(visData))) {
+            return;
         }
-    
-        // Update labels for multiple categories
-        const labels = this.svg.selectAll('.label-group').data(pieData);
-    
-        const labelGroups = labels.enter()
-            .append('g')
-            .attr('class', 'label-group');
-    
-        // Append background rectangles
-        labelGroups.append('rect')
-            .attr('class', 'label-bg')
-            .attr('fill', 'white')
-            .attr('rx', 3) // Rounded corners
-            .attr('ry', 3)
-            .style('opacity', 0.8); // Semi-transparent background
-    
-        // Append text labels
-        labelGroups.append('text')
-            .attr('class', 'label-text')
-            .attr('text-anchor', d => outerArc.centroid(d)[0] > 0 ? 'start' : 'end')
-            .style('font-size', '12px') // Updated font size
-            .style('font-weight', 'bold')
-            .style('fill', 'black');
-    
-        labelGroups.merge(labels)
-            .select('.label-text')
-            .text(d => d.data.label)
-            .attr('transform', d => {
-                const [x, y] = outerArc.centroid(d);
-                let adjustedX = Math.max(
-                    -containerSize / 2 +25,
-                    Math.min(containerSize / 2-25, x)
-                );
-                let adjustedY = Math.max(
-                    -containerSize / 2,
-                    Math.min(containerSize / 2, y)
-                );
-                if(d.data.label === "teardown"){
-                    adjustedY = adjustedY - 20;   
-                }
-                if(d.data.label === "built"){
-                    adjustedY = adjustedY + 20;   
-                }
-                if(d.data.label === "deny"){
-                    adjustedY = adjustedY - 20;   
-                }
-                if(d.data.label === "deny by acl"){
-                    adjustedY = adjustedY - 15;   
-                }
-                if(d.data.label === "deny by acl"){
-                    adjustedX = adjustedX + 15;   
-                }
-                return `translate(${adjustedX}, ${adjustedY})`;
+
+        this.data = visData;
+
+        const processedData = visData.map(entry => {
+            // pick up the first key in the object
+            const name = Object.keys(entry)[0];
+            const array_values = entry[name];
+            // for each element of the array, sum the values
+            const value = Math.log2(array_values.reduce(
+                (acc, curr) => { 
+                    // pick the first key in the object
+                    const key = Object.keys(curr)[0];
+                    // sum the values
+                    return acc + curr[key];
+                } , 0));
+            const slices = array_values;
+            return { name, value, slices };
+        });
+
+        processedData.forEach(d => {
+            d.slices.forEach(s => {
+                this.sliceNames.push(Object.keys(s)[0]);
             });
+        });
+
+        // remove duplicates
+        this.sliceNames = [...new Set(this.sliceNames)];
+
+        // Create hierarchy
+        const root = d3.hierarchy({
+            name: "Root",
+            children: processedData
+        })
+        .sum(d => d.value)
+        .sort((a, b) => b.value - a.value);
     
-        labelGroups.merge(labels)
-            .select('.label-bg')
-            .attr('transform', d => {
-                const [x, y] = outerArc.centroid(d);
-                let adjustedX = Math.max(
-                    -containerSize / 2 +25,
-                    Math.min(containerSize / 2-25, x)
-                );
-                let adjustedY = Math.max(
-                    -containerSize / 2,
-                    Math.min(containerSize / 2, y)
-                );
-                if(d.data.label === "teardown"){
-                    adjustedY = adjustedY - 20;   
-                }
-                if(d.data.label === "built"){
-                    adjustedY = adjustedY + 20;   
-                }
-                if(d.data.label === "deny"){
-                    adjustedY = adjustedY - 20;   
-                }
-                if(d.data.label === "deny by acl"){
-                    adjustedY = adjustedY - 15;   
-                }
-                if(d.data.label === "deny by acl"){
-                    adjustedX = adjustedX + 15;   
-                }
-                return `translate(${adjustedX}, ${adjustedY})`;
-            })
-            .each(function (d) {
-                const textElem = d3.select(this.parentNode).select('.label-text').node();
-                const bbox = textElem.getBBox(); // Get the bounding box of the text
-                d3.select(this)
-                    .attr('x', bbox.x - 5) // Add padding
-                    .attr('y', bbox.y - 5)
-                    .attr('width', bbox.width + 10) // Adjust size based on text
-                    .attr('height', bbox.height + 10);
-            });
+        // Apply pack layout
+        this.packLayout(root);
     
-        labels.exit().remove();
+        // Data join for circle groups
+        this.matSvg.selectAll(".node-group")
+            .data(root.leaves(), d => d.data.name)
+            .join(
+                enter => {
+                    const nodeG = enter.append("g")
+                        .attr("class", "node-group");
+                    
+                    this.updatePieChart(nodeG);
+                    return nodeG;
+                },
+                update => {
+                    this.updatePieChart(update);
+                    return update;
+                },
+                exit => exit.remove()
+            );
+
+        // Render legend
+        this.renderLegend(this.sliceNames);
     }
-    
-    
-    
-    clear() {
-        if (this.svg) {
-            this.svg.selectAll('*').remove();
-            this.svg = null;
-        }
+
+    // Clear the entire visualization
+    clear = function() {
+        d3.select(this.el).selectAll("*").remove();
     }
 }
 
-export default PieChartD3;
+export default pieChartD3;

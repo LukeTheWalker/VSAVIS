@@ -7,7 +7,7 @@ import TimeSeriesContainer from './components/TimeSeries/TimeSeriesContainer';
 import B2BHistoContainer from './components/B2BHisto/B2BHistoContainer';
 import HistoTimeLineContainer from './components/HistoTimeLine/HistoTimeLineContainer';
 import { setSelectedValue } from './redux/SelectionSlice';
-import PieChartContainer from './components/PieChart/PieChartContatiner';
+import PieChartContainer from './components/PieChart/PieChartContainer';
 
 function App() {
     const dispatch = useDispatch();
