@@ -197,9 +197,26 @@ class B2BHistoD3 {
         }
 
         // Function to toggle class visibility
-        const toggleClassVisibility = (isTop, index) => {
-            // Toggle the visibility state
-            this.classVisibility[isTop ? 'top' : 'bottom'][index] = !this.classVisibility[isTop ? 'top' : 'bottom'][index];
+        const toggleClassVisibility = (isTop, index, shiftKey = false) => {
+            const visibilityArray = this.classVisibility[isTop ? 'top' : 'bottom'];
+            
+            // Count currently active classifications
+            const activeCount = visibilityArray.filter(v => v).length;
+
+            if (shiftKey) {
+                if (activeCount === 1 && visibilityArray[index]) {
+                    // If this is the only active one and it's clicked, reactivate all
+                    this.classVisibility[isTop ? 'top' : 'bottom'] = 
+                        visibilityArray.map(() => true);
+                } else {
+                    // Otherwise, only show the clicked classification
+                    this.classVisibility[isTop ? 'top' : 'bottom'] = 
+                        visibilityArray.map((_, i) => i === index);
+                }
+            } else {
+                // Toggle the visibility state
+                visibilityArray[index] = !visibilityArray[index];
+            }
 
             this.setupScales(this.data);
 
@@ -210,7 +227,6 @@ class B2BHistoD3 {
 
             // Update legend item appearance
             updateLegendAppearance(isTop);
-
         };
 
         // Function to update legend item appearance
@@ -219,7 +235,6 @@ class B2BHistoD3 {
 
             legendItems.selectAll(".legend-item")
                 .each(function(d, i) {
-
                     const opacity = isTop 
                         ? (self.classVisibility.top[i] ? 1 : 0.3)
                         : (self.classVisibility.bottom[i] ? 1 : 0.3);
@@ -275,7 +290,7 @@ class B2BHistoD3 {
             .style("cursor", "pointer")
             .on("click", function(event, d) {
                 const index = classifications.top.indexOf(d);
-                toggleClassVisibility(true, index);
+                toggleClassVisibility(true, index, event.shiftKey);
             });
 
         topLegendGroup.call(g => g.append("rect")
@@ -329,7 +344,7 @@ class B2BHistoD3 {
             .style("cursor", "pointer")
             .on("click", function(event, d) {
                 const index = classifications.bottom.indexOf(d);
-                toggleClassVisibility(false, index);
+                toggleClassVisibility(false, index, event.shiftKey);
             });
 
         bottomLegendGroup.call(g => g.append("rect")
@@ -344,7 +359,7 @@ class B2BHistoD3 {
 
         return this;
     }
-
+     
     renderBars = function(xScale) {
         if (!this.data) return this;
 

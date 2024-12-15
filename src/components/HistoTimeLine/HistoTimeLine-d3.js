@@ -186,11 +186,13 @@ class HistoTimeLineD3 {
     }
 
     handleOnClick(d) {
+        const hood = 10;
+
         const startTime = new Date(d.time);
-        startTime.setMinutes(startTime.getMinutes() - 30);
+        startTime.setMinutes(startTime.getMinutes() - hood);
 
         const endTime = new Date(d.time);
-        endTime.setMinutes(endTime.getMinutes() + 30);
+        endTime.setMinutes(endTime.getMinutes() + hood);
 
         // add 1 second to the end time
         endTime.setSeconds(endTime.getSeconds() + 1);
