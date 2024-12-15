@@ -35,10 +35,7 @@ class PieChartD3 {
         const outerArc = d3.arc().innerRadius(this.radius * 1.05).outerRadius(this.radius * 1.05); // Arc for labels
     
         const pieData = pie(data);
-        const containerSize = this.radius * 2; // Approximate container size (diameter)
-    
-        // Check if only one category exists
-        const singleCategory = pieData.length === 1;
+        const containerSize = this.radius * 0.9; // Approximate container size (diameter)
     
         // Update paths for pie slices
         const paths = this.svg.selectAll('path').data(pieData);
@@ -54,65 +51,125 @@ class PieChartD3 {
     
         paths.exit().remove();
     
-        // Handle single category: Place label in the center
+        // Check if there's only one category
+        const singleCategory = pieData.length === 1;
+    
         if (singleCategory) {
-            // Remove any existing lines
-            this.svg.selectAll('line').remove();
+            // Remove any existing labels or rectangles
+            this.svg.selectAll('.label-group').remove();
     
-            // Update label in the center
-            const labels = this.svg.selectAll('text').data(pieData);
+            const centerGroup = this.svg.selectAll('.center-label-group').data(pieData);
     
-            labels.enter()
-                .append('text')
+            const enterGroup = centerGroup.enter()
+                .append('g')
+                .attr('class', 'center-label-group');
+    
+            // Append background rectangle
+            enterGroup.append('rect')
+                .attr('class', 'center-label-bg')
+                .attr('fill', 'white')
+                .attr('rx', 3) // Rounded corners
+                .attr('ry', 3)
+                .style('opacity', 0.8); // Semi-transparent background
+    
+            // Append text label
+            enterGroup.append('text')
+                .attr('class', 'center-label-text')
+                .attr('text-anchor', 'middle')
+                .style('font-size', '18px')
+                .style('font-weight', 'bold')
+                .style('fill', 'black');
+    
+            // Merge and position text and background
+            const mergedGroup = centerGroup.merge(enterGroup);
+    
+            mergedGroup.select('.center-label-text')
                 .text(d => d.data.label)
-                .attr('text-anchor', 'middle') // Center-align text
-                .style('font-size', '25px')
-                .style('fill', 'black')
-                .merge(labels)
-                .transition()
-                .duration(500)
-                .attr('transform', `translate(0, 0)`); // Position at the center
+                .attr('transform', `translate(0, 0)`); // Centered at (0, 0)
     
-            labels.exit().remove();
-        } else {
+            mergedGroup.select('.center-label-bg')
+                .each(function (d) {
+                    const textElem = d3.select(this.parentNode).select('.center-label-text').node();
+                    const bbox = textElem.getBBox(); // Get bounding box of text
+                    d3.select(this)
+                        .attr('x', bbox.x - 5) // Add padding
+                        .attr('y', bbox.y - 5)
+                        .attr('width', bbox.width + 10) // Adjust size based on text
+                        .attr('height', bbox.height + 10);
+                });
     
-            // Update labels outside the pie chart
-            const labels = this.svg.selectAll('text').data(pieData);
+            centerGroup.exit().remove();
     
-            labels.enter()
-            .append('text')
+            return; // Skip the rest of the label logic
+        }
+    
+        // Update labels for multiple categories
+        const labels = this.svg.selectAll('.label-group').data(pieData);
+    
+        const labelGroups = labels.enter()
+            .append('g')
+            .attr('class', 'label-group');
+    
+        // Append background rectangles
+        labelGroups.append('rect')
+            .attr('class', 'label-bg')
+            .attr('fill', 'white')
+            .attr('rx', 3) // Rounded corners
+            .attr('ry', 3)
+            .style('opacity', 0.8); // Semi-transparent background
+    
+        // Append text labels
+        labelGroups.append('text')
+            .attr('class', 'label-text')
+            .attr('text-anchor', d => outerArc.centroid(d)[0] > 0 ? 'start' : 'end')
+            .style('font-size', '18px') // Updated font size
+            .style('font-weight', 'bold')
+            .style('fill', 'black');
+    
+        labelGroups.merge(labels)
+            .select('.label-text')
             .text(d => d.data.label)
-            .attr('text-anchor', d => outerArc.centroid(d)[0] > 0 ? 'start' : 'end') // Align left or right
-            .style('font-size', '25px')
-            .style('fill', 'black')
-            .attr('transform', d => `translate(${outerArc.centroid(d)})`) // Initial position
-            .each(function (d) {
-                // Dynamically adjust positions after calculating text size
-                const textElem = d3.select(this);
-                const bbox = this.getBBox(); // Get the size of the text element
+            .attr('transform', d => {
                 const [x, y] = outerArc.centroid(d);
-
-                // Adjust positions to ensure the text fits within the container
                 const adjustedX = Math.max(
-                    -containerSize / 2 + bbox.width / 2 + 10, 
-                    Math.min(containerSize / 2 - bbox.width / 2 - 10, x)
+                    -containerSize / 2,
+                    Math.min(containerSize / 2, x)
                 );
                 const adjustedY = Math.max(
-                    -containerSize / 2 + bbox.height / 2 + 10, 
-                    Math.min(containerSize / 2 - bbox.height / 2 - 10, y)
+                    -containerSize / 2,
+                    Math.min(containerSize / 2, y)
                 );
-
-                textElem.attr('transform', `translate(${adjustedX}, ${adjustedY})`);
+                return `translate(${adjustedX}, ${adjustedY})`;
+            });
+    
+        labelGroups.merge(labels)
+            .select('.label-bg')
+            .attr('transform', d => {
+                const [x, y] = outerArc.centroid(d);
+                const adjustedX = Math.max(
+                    -containerSize / 2,
+                    Math.min(containerSize / 2, x)
+                );
+                const adjustedY = Math.max(
+                    -containerSize / 2,
+                    Math.min(containerSize / 2, y)
+                );
+                return `translate(${adjustedX}, ${adjustedY})`;
             })
-            .merge(labels)
-            .transition()
-            .duration(500)
-            .attr('text-anchor', d => outerArc.centroid(d)[0] > 0 ? 'start' : 'end'); // Keep alignment consistent
-
+            .each(function (d) {
+                const textElem = d3.select(this.parentNode).select('.label-text').node();
+                const bbox = textElem.getBBox(); // Get the bounding box of the text
+                d3.select(this)
+                    .attr('x', bbox.x - 5) // Add padding
+                    .attr('y', bbox.y - 5)
+                    .attr('width', bbox.width + 10) // Adjust size based on text
+                    .attr('height', bbox.height + 10);
+            });
+    
         labels.exit().remove();
-
-        }
     }
+    
+    
     
     clear() {
         if (this.svg) {
