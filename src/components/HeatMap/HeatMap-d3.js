@@ -91,11 +91,21 @@ class HeatMapD3 {
         var words = d.split(' ');
         el.text('');
     
-        for (var i = 0; i < words.length; i++) {
-            var tspan = el.append('tspan').text(words[i]);
-            if (i > 0)
-                tspan.attr('x', 0).attr('dy', '15').attr('dx', '-10');
-        }
+        var line = '';
+        var lineCount = 0;
+        words.forEach(word => {
+            if (line.length + word.length > 10 && line.length > 0) {
+                el.append('tspan').text(line).attr('x', 0).attr('dy', '0').attr('dx', '-10');
+                line = '';
+                lineCount++;
+            }
+            line += (line.length > 0 ? ' ' : '') + word;
+        });
+        el.append('tspan').text(line).attr('x', 0).attr('dy', '0').attr('dx', '-10');
+
+        const tspans = el.selectAll('tspan').attr('y', function (d, i) {
+            return (.25 + i - (lineCount / 2)) + 'em';
+        });
     };
 
     renderHeatMap = function (visData) {
