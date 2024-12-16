@@ -40,14 +40,12 @@ class HeatMapD3 {
         
         // Number of steps in the legend
         const legendSteps = 10;
-        
-        // Create color legend scale
         const legendScale = d3.scaleLinear()
         .domain([0, legendSteps])
-        .range([0, this.height]);
-        
-        // Create legend color gradient
-        const legendColorScale = d3.scaleSequential(t => 
+        .range([this.height, 0]); // Reversed range
+            
+        // Create legend color scale (now inverted)
+        const legendColorScale = d3.scaleSequential(t =>
             d3.interpolateHsl(
                 d3.hsl(this.baseHSL.h, this.baseHSL.s, 0.8), 
                 d3.hsl(this.baseHSL.h, this.baseHSL.s, 0.2)
@@ -61,14 +59,14 @@ class HeatMapD3 {
         .append("rect")
         .attr("class", "legend-rect")
         .attr("x", 0)
-        .attr("y", d => legendScale(d))
+        .attr("y", d => this.height - (d + 1) * (this.height / legendSteps)) // Invert y-position
         .attr("width", this.legendWidth)
         .attr("height", this.height / legendSteps)
         .attr("fill", d => legendColorScale(d));
         
         // Add scale ticks
         const legendAxis = d3.axisRight(legendScale)
-        .tickValues([0, legendSteps / 2, legendSteps])
+        .tickValues(d3.range(0, legendSteps + 1, 2)) // Skip one every two
         .tickFormat(d => {
             const value = (d / legendSteps) * maxValue;
             return value.toFixed(0);
@@ -85,10 +83,8 @@ class HeatMapD3 {
         .attr("y", this.legendWidth + 50)
         .attr("x", -this.height / 2)
         .attr("text-anchor", "middle")
-        .text("Value")
-        
+        .text("Value");
     }
-    
     insertLinebreaks = function (d) {
         var el = d3.select(this);
         var words = d.split(' ');
@@ -107,7 +103,6 @@ class HeatMapD3 {
         this.xvalues = visData.sources;
         this.classes = visData.classes;
         this.counts = visData.content;
-        
         
         // Transform the counts object into a matrix
         // where each row corresponds to a source
@@ -159,10 +154,16 @@ class HeatMapD3 {
         // Now add color to the heatmap
         // Calculate max value for color scaling
         const maxValue = d3.max(content.flat());
-        
-        // Define a color scale
-        this.colorScale = d3.scaleSequential(d3.interpolateReds)
-        .domain([0, maxValue]);
+
+        // Define a color scale using a sigmoid function for interpolation
+        const cubic = t => Math.pow(t, 1/3);
+        this.baseHSL = d3.hsl("#cc6600"); // Adjust base color as needed
+        this.colorScale = d3.scaleSequential(t => 
+            d3.interpolateHsl(
+            d3.hsl(this.baseHSL.h, this.baseHSL.s, 0.8), // Very light color
+            d3.hsl(this.baseHSL.h, this.baseHSL.s, 0.2)  // Very dark color
+            )(cubic(t))
+        ).domain([0, maxValue]);
         
         // Draw heatmap cells with color
         this.svgG.selectAll(".heatmap-cell")
@@ -219,6 +220,8 @@ class HeatMapD3 {
             },
             exit => exit.remove()
         );
+
+        this.renderColorLegend(maxValue);
     }
     
     clear = function () {
