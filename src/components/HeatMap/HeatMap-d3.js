@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
 
 class HeatMapD3 {
-    margin = { top: 10, right: 80, bottom: 100, left: 180 };
+    margin = { top: 10, right: 80, bottom: 100, left: 80 };
     size;
     height;
     width;
@@ -101,7 +101,7 @@ class HeatMapD3 {
         if (visData === undefined || visData.content.length === 0) return;
         
         this.xvalues = visData.sources;
-        this.classes = visData.classes;
+        this.classes = visData.classes.map(c => c.toString());
         this.counts = visData.content;
         
         // Transform the counts object into a matrix
@@ -191,7 +191,7 @@ class HeatMapD3 {
                     const yValue = this.classes[i % this.classes.length];
                     
                     // Append text to show count
-                    this.svgG.append("text")
+                    const text = this.svgG.append("text")
                     .attr("class", "heatmap-cell-text")
                     .attr("x", this.xScale(xValue) + this.xScale.bandwidth() / 2)
                     .attr("y", this.yScale(yValue) + this.yScale.bandwidth() / 2)
@@ -205,14 +205,54 @@ class HeatMapD3 {
                     .style("pointer-events", "none")
                     .style("user-select", "none");
 
+                    // Append background rectangle for text
+                    const bbox = text.node().getBBox();
+                    const bgrect = this.svgG.append("rect")
+                    .attr("class", "text-bg")
+                    .attr("x", bbox.x - 2)
+                    .attr("y", bbox.y - 2)
+                    .attr("width", bbox.width + 4)
+                    .attr("height", bbox.height + 4)
+                    .attr("fill", "white")
+                    .attr("opacity", 0.8)
+                    .attr("rx", 5) // Rounded corners
+                    .attr("ry", 5);
 
-                    // Draw a white background rect behind the text
-                    // to make it more readable
+                    // on hovering make the cell bigger 
+                    d3.select(event.target)
+                    .raise()
+                    .transition()
+                    .duration(200)
+                    .attr("width", this.xScale.bandwidth() + 10)
+                    .attr("height", this.yScale.bandwidth() + 10)
+                    .attr("x", this.xScale(xValue) - 5)
+                    .attr("y", this.yScale(yValue) - 5)
+                    .attr("stroke", "black")
+                    .attr("stroke-width", 2);
 
+                    bgrect.raise();
+                    text.raise();
 
                 })
                 .on("mouseout", (event, d) => {
+                    const info = d3.select(event.target).attr("info");
+                    const i = info;
+
+                    const xValue = this.xvalues[Math.floor(i / this.classes.length)];
+                    const yValue = this.classes[i % this.classes.length];
+
                     this.svgG.selectAll(".heatmap-cell-text").remove();
+                    this.svgG.selectAll(".text-bg").remove();
+
+                    // on mouse out make the cell normal
+                    d3.select(event.target)
+                    .transition()
+                    .duration(200)
+                    .attr("width", this.xScale.bandwidth())
+                    .attr("height", this.yScale.bandwidth())
+                    .attr("x", (d, i) => this.xScale(xValue))
+                    .attr("y", (d, i) => this.yScale(yValue))
+                    .attr("stroke", "none");
                 });
             },
             update => {
