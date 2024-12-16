@@ -22,7 +22,6 @@ export const getPieChartData = createAsyncThunk('piechart/fetchData', async (arg
     });
     const responseJson = await response.json();
     
-    console.log("Response", responseJson);
     return responseJson;
 });
 

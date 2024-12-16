@@ -16,7 +16,8 @@ class pieChartD3 {
     pie = d3.pie().value(d => d[Object.keys(d)[0]]);
     arc = d3.arc();
 
-    sliceNames;
+    sliceNames = ['Built', 'Deny', 'Deny by ACL', 'Teardown'];
+
 
     constructor(el) {
         this.el = el;
@@ -47,8 +48,6 @@ class pieChartD3 {
         this.matSvg.append("g")
             .attr("class", "legend-group")
             .attr("transform", "translate(0,-30)"); // Position above the chart
-
-        this.sliceNames = []
     }
 
     // Update individual circle elements
@@ -94,7 +93,7 @@ class pieChartD3 {
 
             // Append background rectangle for text
             const bbox = text.node().getBBox();
-            d3.select(this)
+            const bgbox = d3.select(this)
                 .selectAll(".text-bg")
                 .data([d])
                 .join("rect")
@@ -108,6 +107,7 @@ class pieChartD3 {
                 .attr("rx", 5) // Rounded corners
                 .attr("ry", 5);
 
+            bgbox.raise();
             text.raise();
         });
 
@@ -157,36 +157,26 @@ class pieChartD3 {
 
     // Main render method
     renderPieChart = function(visData) {
-        if (!visData || (typeof visData === 'object' && !Array.isArray(visData))) {
-            return;
-        }
+        if (!visData || visData.content.length === 0) return;
 
         this.data = visData;
+        this.protocolNames = Object.keys(visData.content);
 
-        const processedData = visData.map(entry => {
+        const processedData = this.protocolNames.map(name => {
             // pick up the first key in the object
-            const name = Object.keys(entry)[0];
-            const array_values = entry[name];
+            const array_values = Object.values(visData.content[name]);
+
             // for each element of the array, sum the values
             const value = Math.max(Math.log2(array_values.reduce(
                 (acc, curr) => { 
-                    // pick the first key in the object
-                    const key = Object.keys(curr)[0];
-                    // sum the values
-                    return acc + curr[key];
+                    return acc + curr;
                 } , 0)), 1);
-            const slices = array_values;
+
+            const slices = array_values.map((v, i) => {
+                return { [Object.keys(visData.content[name])[i]]: v };
+            });
             return { name, value, slices };
         });
-
-        processedData.forEach(d => {
-            d.slices.forEach(s => {
-                this.sliceNames.push(Object.keys(s)[0]);
-            });
-        });
-
-        // remove duplicates
-        this.sliceNames = [...new Set(this.sliceNames)].sort();
 
         // Create hierarchy
         const root = d3.hierarchy({
