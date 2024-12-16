@@ -1,13 +1,14 @@
 import './ChordDiagram.css';
 import { useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { getChordDiagramData } from '../../redux/chordDiagramSlice'; // Adjust the path as needed
-import ChordDiagramD3 from './ChordDiagramD3';
+import { getChordDiagramData } from '../../redux/ChordDiagramSlice'; 
+import ChordDiagramD3 from './ChordDiagram-d3';
 
 function ChordDiagramContainer() {
     // Redux hooks to access state and dispatch actions
-    const data = useSelector((state) => state.chordDiagram.data); // Get chord diagram data from the Redux store
+    let data = useSelector((state) => state.chordDiagram.data); // Get chord diagram data from the Redux store
     const dispatch = useDispatch();
+    console.log(data)
 
     // Refs to manage D3 and container div
     const divContainerRef = useRef(null);

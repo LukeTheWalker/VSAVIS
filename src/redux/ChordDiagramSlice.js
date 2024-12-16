@@ -1,11 +1,9 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import server from './config';
-import { chord } from 'd3';
 
 const initial_state = {
     "nodes": [],
-    "matrix": [],
-    "links": []
+    "matrix": []
 }
 
 // get the data in asyncThunk

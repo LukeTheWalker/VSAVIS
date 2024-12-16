@@ -14,6 +14,6 @@ export default configureStore({
     selection: selectSliceReducer,
     histoTimeline: histoTimeLineReducer,
     piechart: PieChartReducer,
-    chorddiagram: ChordDiagramReducer
+    chordDiagram: ChordDiagramReducer
     }
 })
