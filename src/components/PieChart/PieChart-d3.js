@@ -63,8 +63,6 @@ class pieChartD3 {
             // Create pie chart data from the slices
             const pieData = self.pie(d.data.slices);
 
-            console.log(self.sliceNames);
-
             // Create/update pie segments
             d3.select(this)
                 .selectAll(".segment")

@@ -89,6 +89,18 @@ class HeatMapD3 {
         
     }
     
+    insertLinebreaks = function (d) {
+        var el = d3.select(this);
+        var words = d.split(' ');
+        el.text('');
+    
+        for (var i = 0; i < words.length; i++) {
+            var tspan = el.append('tspan').text(words[i]);
+            if (i > 0)
+                tspan.attr('x', 0).attr('dy', '15').attr('dx', '-10');
+        }
+    };
+
     renderHeatMap = function (visData) {
         if (visData === undefined || visData.content.length === 0) return;
         
@@ -140,7 +152,9 @@ class HeatMapD3 {
         
         this.svgG.append("g")
         .attr("class", "y-axis")
-        .call(d3.axisLeft(this.yScale));
+        .call(d3.axisLeft(this.yScale))
+
+        this.svgG.selectAll(".y-axis text").each(this.insertLinebreaks);
         
         // Now add color to the heatmap
         // Calculate max value for color scaling
@@ -205,90 +219,6 @@ class HeatMapD3 {
             },
             exit => exit.remove()
         );
-        
-        
-        
-        // Render color legend
-        // this.renderColorLegend(maxValue);
-        
-        // Draw heatmap cells
-        // This.counts is a dictionary that contains the x axis and a list of y axis, with the name and the count
-        // for each cell
-        
-        // // Calculate max value for color scaling
-        // const maxValue = d3.max(content, d => d3.sum(d.values));
-        
-        // // Define a color scale using a sigmoid function for interpolation
-        // const cubic = t => Math.pow(t, 1/3);
-        // this.baseHSL = d3.hsl("#cc6600"); // Adjust base color as needed
-        // this.colorScale = d3.scaleSequential(t => 
-            //     d3.interpolateHsl(
-        //     d3.hsl(this.baseHSL.h, this.baseHSL.s, .8), // Very light color
-        //     d3.hsl(this.baseHSL.h, this.baseHSL.s, 0.2)  // Very dark color
-        //     )(cubic(t))
-        // ).domain([0, maxValue]);
-        
-        
-        
-        // // Draw heatmap cells
-        // this.svgG.selectAll(".heatmap-cell")
-        // .data(content)
-        // .join(
-        //     enter => {
-            //         const cellGroup = enter.append("g"); // Create a group for each cell
-        
-        //         // Append rect
-        //         cellGroup.append("rect")
-        //             .attr("class", "heatmap-cell")
-        //             .attr("x", d => xScale(d.source))
-        //             .attr("y", d => yScale(d.destination))
-        //             .attr("width", xScale.bandwidth())
-        //             .attr("height", yScale.bandwidth())
-        //             .attr("fill", d => this.colorScale(d3.sum(d.values))); // Adjust color as needed
-        
-        //         // Append background rect for text
-        //         // cellGroup.append("rect")
-        //         //     .attr("class", "heatmap-cell-text-bg")
-        //         //     .attr("x", d => xScale(d.source) + xScale.bandwidth() / 2)
-        //         //     .attr("y", d => yScale(d.destination) + yScale.bandwidth() / 2)
-        //         //     .attr("width", function(d) {
-        //         //         const text = d3.sum(d.values).toString();
-        //         //         return text.length * 8 + 10; // Adjust width based on text length
-        //         //     })
-        //         //     .attr("height", 20) // Adjust height as needed
-        //         //     .attr("rx", 5) // Rounded corners
-        //         //     .attr("ry", 5) // Rounded corners
-        //         //     .style("fill", "white")
-        //         //     .style("opacity", 0.8)
-        //         //     .attr("transform", function(d) {
-        //         //         const text = d3.sum(d.values).toString();
-        //         //         const width = text.length * 8;
-        //         //         return `translate(${-width / 2 - 5}, -10)`; // Center the background rect
-        //         //     });
-        
-        //         // // Append text
-        //         // cellGroup.append("text")
-        //         //     .attr("class", "heatmap-cell-text")
-        //         //     .attr("x", d => xScale(d.source) + xScale.bandwidth() / 2)
-        //         //     .attr("y", d => yScale(d.destination) + yScale.bandwidth() / 2)
-        //         //     .attr("dy", "0.35em") // Center vertically
-        //         //     .attr("text-anchor", "middle") // Center horizontally
-        //         //     .text(d => d3.sum(d.values)) // Replace this with your desired value
-        //         //     .style("fill", "black") // Adjust color as needed
-        //         //     .style("font-size", "12px"); // Adjust font size as needed
-        //     },
-        //     update => {
-            //         update.select("rect")
-        //             .attr("fill", d => this.colorScale(d3.sum(d.values)));
-        
-        //         // update.select("text")
-        //         //     .text(d => d3.sum(d.values));
-        //     },
-        //     exit => exit.remove()
-        // );
-        
-        // // Render color legend
-        // this.renderColorLegend(maxValue);
     }
     
     clear = function () {

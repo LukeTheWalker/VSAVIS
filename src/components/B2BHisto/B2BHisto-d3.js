@@ -413,7 +413,6 @@ class B2BHistoD3 {
                     
                     // Tooltip positioning logic
                     const tooltipWidth = 250; // From the createTooltipPieChart method
-                    const tooltipHeight = 120; // Estimate based on previous implementation
 
                     let tooltipX, tooltipY;
                     if (mouseX_percent > 0.75) {
@@ -484,7 +483,6 @@ class B2BHistoD3 {
                     
                     // Tooltip positioning logic
                     const tooltipWidth = 250; // From the createTooltipPieChart method
-                    const tooltipHeight = 120; // Estimate based on previous implementation
 
                     let tooltipX, tooltipY;
                     if (mouseX_percent > 0.75) {

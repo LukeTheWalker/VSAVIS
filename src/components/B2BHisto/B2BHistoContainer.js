@@ -5,7 +5,6 @@ import { getB2BHistoData } from '../../redux/B2BHistoSlice'
 
 
 import B2BHistoD3 from './B2BHisto-d3'
-import { getHeatMapData } from '../../redux/HeatMapSlice';
 import { setHeatmapChoice } from '../../redux/SelectionSlice';
 
 function B2BHistoContainer() {
@@ -16,9 +15,6 @@ function B2BHistoContainer() {
     const selectedValueModeFIR = useSelector(state => state.selection.dropdownModeFIR);
     const selectedValueNumBins = useSelector(state => state.selection.numBins);
     const selectedInterval = useSelector(state => state.histoTimeline.selectedInterval);
-
-    const selectedHeatmapClass = useSelector(state => state.selection.dropdownHeat);
-
     
     const dispatch = useDispatch();
 
