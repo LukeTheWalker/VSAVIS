@@ -168,13 +168,13 @@ class pieChartD3 {
             const name = Object.keys(entry)[0];
             const array_values = entry[name];
             // for each element of the array, sum the values
-            const value = Math.log2(array_values.reduce(
+            const value = Math.max(Math.log2(array_values.reduce(
                 (acc, curr) => { 
                     // pick the first key in the object
                     const key = Object.keys(curr)[0];
                     // sum the values
                     return acc + curr[key];
-                } , 0));
+                } , 0)), 1);
             const slices = array_values;
             return { name, value, slices };
         });
@@ -186,7 +186,7 @@ class pieChartD3 {
         });
 
         // remove duplicates
-        this.sliceNames = [...new Set(this.sliceNames)];
+        this.sliceNames = [...new Set(this.sliceNames)].sort();
 
         // Create hierarchy
         const root = d3.hierarchy({
