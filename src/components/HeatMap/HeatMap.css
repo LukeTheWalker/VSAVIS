@@ -8,3 +8,7 @@
     font-size: 15px;
     border-radius: 5px;
 }
+
+.heatmap-cell-text, .heatmapDivContainer .text-bg {
+    pointer-events: none;
+}
