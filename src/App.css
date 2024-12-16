@@ -1,149 +1,152 @@
 /* General App container styling */
 .App {
-  text-align: center;
-  font-family: 'Roboto', sans-serif;
-  padding: 20px;
-  box-sizing: border-box;
+    text-align: center;
+    font-family: 'Roboto', sans-serif;
+    padding: 20px;
+    box-sizing: border-box;
 }
 
 /* Dropdown and input container as a grid */
 .dropdown-grid {
-  display: grid;
-  grid-template-areas: 
-    "firewall-mode IDS"
-    "bins bins";
-  grid-gap: 20px;
-  justify-content: center;
-  margin: 40px 0;
+    display: grid;
+    grid-template-areas: 
+        "firewall-mode IDS"
+        "bins bins";
+    grid-gap: 20px;
+    justify-content: center;
+    margin: 40px 0;
 }
 
 .grid-item {
-  padding: 10px;
+    padding: 10px;
 }
 
 .firewall-mode {
-  grid-area: firewall-mode;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+    grid-area: firewall-mode;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
 }
 
 .ids {
-  grid-area: IDS;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+    grid-area: IDS;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
 }
 
 .bins {
-  grid-area: bins;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+    grid-area: bins;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
 }
 
 /* Labels */
 .dropdown-label {
-  font-size: 16px;
-  font-weight: 500;
-  color: #333;
-  margin-bottom: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 8px;
 }
 
 /* Dropdowns and input fields */
 .dropdown-select, .input-field {
-  width: 100%;
-  padding: 12px;
-  font-size: 16px;
-  font-weight: 400;
-  border: 2px solid #ddd;
-  border-radius: 8px;
-  background-color: #fff;
-  color: #333;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: border-color 0.3s ease, background-color 0.3s ease;
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    font-weight: 400;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    background-color: #fff;
+    color: #333;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: border-color 0.3s ease, background-color 0.3s ease;
+    -webkit-appearance: none; /* Remove default styling on Apple devices */
+    -moz-appearance: none; /* Remove default styling on Firefox */
+    appearance: none; /* Remove default styling */
 }
 
 /* Hover and focus effects */
 .dropdown-select:hover, .input-field:hover {
-  border-color: #aaa;
-  background-color: #f9f9f9;
+    border-color: #aaa;
+    background-color: #f9f9f9;
 }
 
 .dropdown-select:focus, .input-field:focus {
-  outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 8px rgba(0, 123, 255, 0.25);
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.25);
 }
 
 /* Style for submit button */
 .btn-submit {
-  margin-top: 10px;
-  padding: 10px 20px;
-  font-size: 16px;
-  font-weight: 500;
-  color: #fff;
-  background-color: #007bff;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    margin-top: 10px;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: 500;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .btn-submit:hover {
-  background-color: #0056b3;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #0056b3;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .btn-submit:focus {
-  outline: none;
-  box-shadow: 0 0 8px rgba(0, 123, 255, 0.25);
+    outline: none;
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.25);
 }
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .dropdown-grid {
-    grid-template-areas: 
-      "firewall-mode"
-      "IDS"
-      "bins";
-  }
-  .dropdown-container {
-    flex-direction: column;
-  }
+    .dropdown-grid {
+        grid-template-areas: 
+            "firewall-mode"
+            "IDS"
+            "bins";
+    }
+    .dropdown-container {
+        flex-direction: column;
+    }
 }
 
 /* Alternative approach if you want more explicit height control */
 .HeatAndPieContainer {
-    width: 100%;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    grid-auto-rows: minmax(300px, auto); /* Ensures minimum height, can grow as needed */
-  }
-  
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        grid-auto-rows: minmax(300px, auto); /* Ensures minimum height, can grow as needed */
+    }
+    
 .heatmap-container {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem; /* Spacing between the sections */
+        display: flex;
+        flex-direction: column;
+        gap: 1rem; /* Spacing between the sections */
 }
 
 .heatmap-selector {
-    display: flex;
-    flex-direction: column;
-    align-items: center; /* Center horizontally */
-    justify-content: center; /* Center vertically */
-    gap: 0.5rem; /* Spacing between the label and the dropdown */
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* Center horizontally */
+        justify-content: center; /* Center vertically */
+        gap: 0.5rem; /* Spacing between the label and the dropdown */
 }
 
 .short-select {
-    width: 60%; /* Adjust width as needed (e.g., 50% or 300px) */
-    max-width: 300px; /* Optional: Limit the maximum width */
-    min-width: 200px; /* Optional: Ensure a minimum width */
-    text-align: left; /* Align text properly inside the dropdown */
+        width: 60%; /* Adjust width as needed (e.g., 50% or 300px) */
+        max-width: 300px; /* Optional: Limit the maximum width */
+        min-width: 200px; /* Optional: Ensure a minimum width */
+        text-align: left; /* Align text properly inside the dropdown */
 }
 
 /* Keep the heading centered */
 .text-center {
-    text-align: center;
+        text-align: center;
 }
