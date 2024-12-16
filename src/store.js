@@ -5,7 +5,7 @@ import b2bHistoReducer from './redux/B2BHistoSlice'
 import selectSliceReducer from './redux/SelectionSlice'
 import histoTimeLineReducer from './redux/HistoTimeLineSlice'
 import PieChartReducer from './redux/PieChartSlice'
-
+import ChordDiagramReducer from './redux/ChordDiagramSlice'
 export default configureStore({
   reducer: {
     heatmap: heatmapReducer,
@@ -13,6 +13,7 @@ export default configureStore({
     b2bhist: b2bHistoReducer,
     selection: selectSliceReducer,
     histoTimeline: histoTimeLineReducer,
-    piechart: PieChartReducer
+    piechart: PieChartReducer,
+    chorddiagram: ChordDiagramReducer
     }
 })
