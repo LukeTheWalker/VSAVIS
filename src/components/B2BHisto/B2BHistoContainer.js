@@ -52,9 +52,13 @@ function B2BHistoContainer() {
         const b2BHistoD3 = b2BHistoD3Ref.current;
         const behavior = {
             timelineSelection: (interval) => {
+
+                const start = interval.start.replace('T',' ') + ":00";
+                const end = interval.end.replace('T',' ') + ":00";
+
                 dispatch(setHeatmapChoice({ 
-                    start: new Date(interval.start).toISOString().slice(0, 19).replace('T', ' '),
-                    end: new Date(interval.end).toISOString().slice(0, 19).replace('T', ' ')
+                    start: start,
+                    end: end
                  }));
             }
         };

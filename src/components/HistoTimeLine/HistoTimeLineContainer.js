@@ -61,10 +61,11 @@ function HistoTimeLineContainer() {
                 if (interval.start === interval.end) {
                     dispatch(setHeatmapChoice({}));
                     return;
-                }
+                };
+
                 dispatch(setHeatmapChoice({
-                    start: new Date(interval.start).toISOString().slice(0, 19).replace('T', ' '),
-                    end: new Date(interval.end).toISOString().slice(0, 19).replace('T', ' ')
+                    start: interval.start,
+                    end: interval.end
                 }));
                 return;
             }
