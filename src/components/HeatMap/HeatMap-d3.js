@@ -142,8 +142,8 @@ class HeatMapD3 {
         .call(d3.axisBottom(this.xScale))
         .selectAll("text")
         .style("text-anchor", "start")
-        .attr("dx", ".5em")
-        .attr("dy", ".15em")
+        .attr("dx", "1em")
+        .attr("dy", "-.6em")
         .attr("transform", "rotate(90)")
         
         this.svgG.append("g")
