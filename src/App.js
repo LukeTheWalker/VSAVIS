@@ -8,7 +8,7 @@ import B2BHistoContainer from './components/B2BHisto/B2BHistoContainer';
 import HistoTimeLineContainer from './components/HistoTimeLine/HistoTimeLineContainer';
 import { setSelectedValue } from './redux/SelectionSlice';
 import PieChartContainer from './components/PieChart/PieChartContainer';
-import ChordDiagramContainer from './components/ChordDiagram/ChordDiagramContainer';
+
 function App() {
     const dispatch = useDispatch();
     const resizedRef = useRef(useSelector(state => state.global.resized));
@@ -77,23 +77,6 @@ function App() {
                         <option value="log">Log</option>
                         <option value="unique">Unique</option>
                     </select>
-
-                    <label htmlFor="dropdownHeat" className="dropdown-label">Choose an attribute for the HeatMap:</label>
-                    <select
-                        id="dropdownHeat"
-                        className="dropdown-select"
-                        onChange={(e) => handleChange('dropdownHeat', e)}
-                        defaultValue={selectedValueHeat}
-                    >
-                        <option value="classification">IDS/Classification</option>
-                        <option value="priority">IDS/Priority</option>
-                        <option value="label">IDS/Label</option>
-                        <option value="Syslog priority">FIR/Syslog priority</option>
-                        <option value="Operation">FIR/Operation</option>
-                        <option value="Protocol">FIR/Protocol</option>
-                        <option value="Destination service">FIR/Destination service</option>
-                        <option value="Direction">FIR/Direction</option>
-                    </select>
                 </div>
 
                 {/* Upper right: IDS */}
@@ -138,17 +121,33 @@ function App() {
             <B2BHistoContainer />
             <hr className="separator" />
             <br />
-            {/* <ChordDiagramContainer /> */}
             <div className="HeatAndPieContainer w-full grid grid-cols-2 gap-4">
-                <div className="border rounded-lg shadow-sm">
+                <div className="border rounded-lg shadow-sm heatmap-container">
                     <div className="p-4 border-b">
-                    <h2 className="text-xl font-semibold">Heatmap</h2>
+                        <h2 className="text-xl font-semibold text-center">Heatmap</h2>
+                    </div>
+                    <div className="p-4 heatmap-selector">
+                        <label htmlFor="dropdownHeat" className="dropdown-label">Choose an attribute for the HeatMap:</label>
+                        <select
+                            id="dropdownHeat"
+                            className="dropdown-select short-select"
+                            onChange={(e) => handleChange('dropdownHeat', e)}
+                            defaultValue={selectedValueHeat}
+                        >
+                            <option value="classification">IDS/Classification</option>
+                            <option value="priority">IDS/Priority</option>
+                            <option value="label">IDS/Label</option>
+                            <option value="Syslog priority">FIR/Syslog priority</option>
+                            <option value="Operation">FIR/Operation</option>
+                            <option value="Protocol">FIR/Protocol</option>
+                            <option value="Destination service">FIR/Destination service</option>
+                            <option value="Direction">FIR/Direction</option>
+                        </select>
                     </div>
                     <div className="p-4">
-                    <HeatMapContainer />
+                        <HeatMapContainer />
                     </div>
                 </div>
-                
                 <div className="border rounded-lg shadow-sm">
                     <div className="p-4 border-b">
                     <h2 className="text-xl font-semibold">Pie Chart</h2>
