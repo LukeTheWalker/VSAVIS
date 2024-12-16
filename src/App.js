@@ -142,6 +142,7 @@ function App() {
                             <option value="Protocol">FIR/Protocol</option>
                             <option value="Destination service">FIR/Destination service</option>
                             <option value="Direction">FIR/Direction</option>
+                            <option value="Destination IP">FIR/Destination IP</option>
                         </select>
                     </div>
                     <div className="p-4">

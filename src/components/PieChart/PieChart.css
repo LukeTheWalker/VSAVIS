@@ -17,16 +17,6 @@
     text-transform: uppercase;
 }
 
-/* Maintain the hover effect for pie chart segments */
-path {
-    transition: transform 0.2s ease-in-out;
-    cursor: pointer;
-}
-
-path:hover {
-    transform: scale(1.05);
-}
-
 /* Add responsive adjustments */
 @media screen and (max-width: 768px) {
     .packed-charts-wrapper {
