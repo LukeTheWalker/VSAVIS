@@ -69,7 +69,8 @@ class HeatMapD3 {
         .tickValues(d3.range(0, legendSteps + 1, 2)) // Skip one every two
         .tickFormat(d => {
             const value = (d / legendSteps) * maxValue;
-            return value.toFixed(0);
+            const invertedValue = Math.pow(2, value) - 1;
+            return invertedValue.toFixed(0);
         });
         
         legendG.append("g")
@@ -110,7 +111,7 @@ class HeatMapD3 {
         // The value in each cell is the count
         const content = this.xvalues.map(source => {
             return this.classes.map(destination => {
-                return this.counts[source][destination]
+                return Math.log2(this.counts[source][destination] + 1)
             });
         });
         
@@ -198,7 +199,7 @@ class HeatMapD3 {
                     .attr("font-size", "12px")
                     .attr("dy", ".35em")
                     .attr("text-anchor", "middle")
-                    .text(d)
+                    .text(Math.round(Math.pow(2, d) - 1))
                     .style("fill", "black")
                     .style("font-size", "12px")
                     .style("font-weight", "bold")
