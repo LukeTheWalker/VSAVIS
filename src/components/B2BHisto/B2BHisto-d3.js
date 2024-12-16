@@ -169,9 +169,7 @@ class B2BHistoD3 {
     };
     
     resetZoom = function () {
-        this.svg.transition()
-            .duration(750)
-            .call(this.zoom.transform, d3.zoomIdentity); // Reset transform to identity
+        this.svg.call(this.zoom.transform, d3.zoomIdentity); // Reset transform to identity
         return this;
     };
 
@@ -217,6 +215,8 @@ class B2BHistoD3 {
                 // Toggle the visibility state
                 visibilityArray[index] = !visibilityArray[index];
             }
+
+            this.resetZoom();
 
             this.setupScales(this.data);
 
@@ -658,6 +658,7 @@ class B2BHistoD3 {
         // Legend
         this.renderLegend(data.classifications);
 
+        this.resetZoom();
 
         return this;
     }
