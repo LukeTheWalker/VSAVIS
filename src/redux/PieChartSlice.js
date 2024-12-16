@@ -9,13 +9,20 @@ const initial_state = {
 export const getPieChartData = createAsyncThunk('piechart/fetchData', async (args, thunkAPI) => {
     // Simulate fetching data by using the fake_json
     // const response = await fetch('http://localhost:5000/getHeatMapData');
-    const response = await fetch(server + '/getPieChartData', {
+    const urlParams = new URLSearchParams({
+        start: args.start,
+        end: args.end,
+        axis: 'pie'
+    });
+
+    const response = await fetch(server + '/getHeatMapData?' + urlParams.toString(), {
         headers: {
             'ngrok-skip-browser-warning': 'true'
         }
     });
     const responseJson = await response.json();
     
+    console.log("Response", responseJson);
     return responseJson;
 });
 

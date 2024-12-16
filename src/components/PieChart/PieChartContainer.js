@@ -9,12 +9,19 @@ function PieChartContainer() {
     const resized = useSelector(state => state.global.resized);
     const dispatch = useDispatch();
 
+    const selectedPieChartStart = useSelector(state => state.selection.heatmapStart);
+    const selectedPieChartEnd = useSelector(state => state.selection.heatmapEnd);
+
+
     const divContainerRef = useRef(null);
     const pieChartD3Ref = useRef(null);
 
     useEffect(() => {
-        dispatch(getPieChartData());
-    }, [dispatch]);
+        dispatch(getPieChartData({
+            start: selectedPieChartStart,
+            end: selectedPieChartEnd
+        }));
+    }, [dispatch, selectedPieChartStart, selectedPieChartEnd]);
 
     const getChartSize = function () {
         let width;
