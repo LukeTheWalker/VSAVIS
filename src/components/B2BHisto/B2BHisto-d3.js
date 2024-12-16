@@ -48,6 +48,8 @@ class B2BHistoD3 {
         // Setup zoom functionality
         this.setupZoom();
 
+        this.zoomEnabled = false;
+
         // Create tooltip div
         this.tooltip = d3.select(this.el)
             .append("div")
@@ -176,6 +178,8 @@ class B2BHistoD3 {
     renderLegend = function(classifications) {
         // Remove existing legend
         this.legendSvg.remove();
+
+        this.zoomEnabled = true;
         
         // Recreate legend group as the last child of SVG to ensure it's on top
         this.legendSvg = this.svg.append("g")
