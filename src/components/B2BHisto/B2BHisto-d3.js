@@ -197,9 +197,26 @@ class B2BHistoD3 {
         }
 
         // Function to toggle class visibility
-        const toggleClassVisibility = (isTop, index) => {
-            // Toggle the visibility state
-            this.classVisibility[isTop ? 'top' : 'bottom'][index] = !this.classVisibility[isTop ? 'top' : 'bottom'][index];
+        const toggleClassVisibility = (isTop, index, shiftKey = false) => {
+            const visibilityArray = this.classVisibility[isTop ? 'top' : 'bottom'];
+            
+            // Count currently active classifications
+            const activeCount = visibilityArray.filter(v => v).length;
+
+            if (shiftKey) {
+                if (activeCount === 1 && visibilityArray[index]) {
+                    // If this is the only active one and it's clicked, reactivate all
+                    this.classVisibility[isTop ? 'top' : 'bottom'] = 
+                        visibilityArray.map(() => true);
+                } else {
+                    // Otherwise, only show the clicked classification
+                    this.classVisibility[isTop ? 'top' : 'bottom'] = 
+                        visibilityArray.map((_, i) => i === index);
+                }
+            } else {
+                // Toggle the visibility state
+                visibilityArray[index] = !visibilityArray[index];
+            }
 
             this.setupScales(this.data);
 
@@ -210,7 +227,6 @@ class B2BHistoD3 {
 
             // Update legend item appearance
             updateLegendAppearance(isTop);
-
         };
 
         // Function to update legend item appearance
@@ -219,7 +235,6 @@ class B2BHistoD3 {
 
             legendItems.selectAll(".legend-item")
                 .each(function(d, i) {
-
                     const opacity = isTop 
                         ? (self.classVisibility.top[i] ? 1 : 0.3)
                         : (self.classVisibility.bottom[i] ? 1 : 0.3);
@@ -275,7 +290,7 @@ class B2BHistoD3 {
             .style("cursor", "pointer")
             .on("click", function(event, d) {
                 const index = classifications.top.indexOf(d);
-                toggleClassVisibility(true, index);
+                toggleClassVisibility(true, index, event.shiftKey);
             });
 
         topLegendGroup.call(g => g.append("rect")
@@ -329,7 +344,7 @@ class B2BHistoD3 {
             .style("cursor", "pointer")
             .on("click", function(event, d) {
                 const index = classifications.bottom.indexOf(d);
-                toggleClassVisibility(false, index);
+                toggleClassVisibility(false, index, event.shiftKey);
             });
 
         bottomLegendGroup.call(g => g.append("rect")
@@ -344,7 +359,7 @@ class B2BHistoD3 {
 
         return this;
     }
-
+     
     renderBars = function(xScale) {
         if (!this.data) return this;
 
@@ -384,22 +399,50 @@ class B2BHistoD3 {
                 const s = enter.append("rect")
                 .attr("class", "top-bar")
                 .on("mouseover", (event, d) => {
+                    const mouseX = d3.pointer(event)[0];
+                    const mouseX_percent = mouseX / this.width;
+
+                    const timeIndex = this.parsedTimes.findIndex((t, i) => {
+                        const nextT = i < this.parsedTimes.length - 1 ? this.parsedTimes[i + 1] : this.xScale.invert(this.width);
+                        return this.xScale.invert(mouseX) > t && this.xScale.invert(mouseX) < nextT;
+                    });
+
+                    const barData = this.data.content[timeIndex].top;
+
+                    this.createTooltipPieChart(barData, true);
+                    
+                    // Tooltip positioning logic
+                    const tooltipWidth = 250; // From the createTooltipPieChart method
+
+                    let tooltipX, tooltipY;
+                    if (mouseX_percent > 0.75) {
+                        // Position tooltip to the left of the mouse
+                        tooltipX = event.pageX - tooltipWidth - 20;
+                    } else {
+                        // Position tooltip to the right of the mouse
+                        tooltipX = event.pageX + 10;
+                    }
+
+                    // Vertically center the tooltip relative to the mouse
+                    tooltipY = event.pageY;
+
+                    this.tooltip
+                    .style("visibility", "visible")
+                    .style("left", `${tooltipX}px`)
+                    .style("top", `${tooltipY}px`);
+                })
+                .on("mouseout", () => {
+                    this.tooltip.style("visibility", "hidden");
+                })
+                .on("click", (event, d) => {
                     const mouseX = this.xScale.invert(d3.pointer(event)[0]);
                     const timeIndex = this.parsedTimes.findIndex((t, i) => {
                         const nextT = i < this.parsedTimes.length - 1 ? this.parsedTimes[i + 1] : new Date(t.getTime() + (t.getTime() - this.parsedTimes[i-1].getTime()));
                         return mouseX > t && mouseX < nextT;
                     });
 
-                    const barData = this.data.content[timeIndex].top;
-
-                    this.createTooltipPieChart(barData, true);
-                    this.tooltip
-                    .style("visibility", "visible")
-                    .style("left", `${event.pageX + 10}px`)
-                    .style("top", `${event.pageY - 10}px`);
-                })
-                .on("mouseout", () => {
-                    this.tooltip.style("visibility", "hidden");
+                    this.behavior.timelineSelection({start: this.data.times[timeIndex], end: this.data.times[timeIndex + 1]});
+                    
                 });
                 this.updateSquareTop(s, xScale);
             },
@@ -407,7 +450,7 @@ class B2BHistoD3 {
             exit => exit.remove()
             );
 
-        // Render bottom bars
+        // Similar modifications for bottom bars
         const bottomBars = this.bottomBarsG.selectAll(".bottom-bar-group")
             .data(bottomStackedData)
             .join(
@@ -426,22 +469,52 @@ class B2BHistoD3 {
                 const s = enter.append("rect")
                 .attr("class", "bottom-bar")
                 .on("mouseover", (event, d) => {
+                    const mouseX = d3.pointer(event)[0];
+                    const mouseX_percent = mouseX / this.width;
+
+                    const timeIndex = this.parsedTimes.findIndex((t, i) => {
+                        const nextT = i < this.parsedTimes.length - 1 ? this.parsedTimes[i + 1] : this.xScale.invert(this.width);
+                        return this.xScale.invert(mouseX) > t && this.xScale.invert(mouseX) < nextT;
+                    });
+
+                    const barData = this.data.content[timeIndex].bottom;
+
+                    this.createTooltipPieChart(barData, false);
+                    
+                    // Tooltip positioning logic
+                    const tooltipWidth = 250; // From the createTooltipPieChart method
+
+                    let tooltipX, tooltipY;
+                    if (mouseX_percent > 0.75) {
+                        // Position tooltip to the left of the mouse
+                        tooltipX = event.pageX - tooltipWidth - 20;
+                    } else {
+                        // Position tooltip to the right of the mouse
+                        tooltipX = event.pageX + 10;
+                    }
+
+                    // Vertically center the tooltip relative to the mouse
+                    tooltipY = event.pageY;
+
+                    this.tooltip
+                    .style("visibility", "visible")
+                    .style("left", `${tooltipX}px`)
+                    .style("top", `${tooltipY}px`);
+                })
+                .on("mouseout", () => {
+                    this.tooltip.style("visibility", "hidden");
+                })
+                .on("click", (event, d) => {
                     const mouseX = this.xScale.invert(d3.pointer(event)[0]);
                     const timeIndex = this.parsedTimes.findIndex((t, i) => {
                         const nextT = i < this.parsedTimes.length - 1 ? this.parsedTimes[i + 1] : new Date(t.getTime() + (t.getTime() - this.parsedTimes[i-1].getTime()));
                         return mouseX >= t && mouseX < nextT;
                     });
-                    const barData = this.data.content[timeIndex].bottom;
 
-                    this.createTooltipPieChart(barData, false);
-                    this.tooltip
-                    .style("visibility", "visible")
-                    .style("left", `${event.pageX + 10}px`)
-                    .style("top", `${event.pageY - 10}px`);
+                    this.behavior.timelineSelection({start: this.data.times[timeIndex], end: this.data.times[timeIndex + 1]});
                 })
-                .on("mouseout", () => {
-                    this.tooltip.style("visibility", "hidden");
-                });
+                ;
+
                 this.updateSquareBottom(s, xScale);
             },
             update => this.updateSquareBottom(update, xScale),
@@ -449,6 +522,7 @@ class B2BHistoD3 {
             );
 
         return this;
+
     }
 
     setupScales = function(data) {
@@ -565,8 +639,10 @@ class B2BHistoD3 {
         return this;
     }
 
-    renderB2BHisto = function (data) {
+    renderB2BHisto = function (data, behavior) {
         if (!data || !data.content || !data.content.length) return this;
+
+        this.behavior = behavior;
 
         this.resetClassFilter(data);
 

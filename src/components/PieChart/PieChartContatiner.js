@@ -46,7 +46,6 @@ function PieChartContainer() {
 
     // Initialize the pie charts when the component mounts
     useEffect(() => {
-        console.log("PieChartContainer mounting");
         // Create a pie chart for each item in the data (without using map)
         for (let i = 0; i < data.length; i++) {
             const pieChartD3 = new PieChartD3(divPieChartContainerRefs.current[i]);
@@ -55,14 +54,12 @@ function PieChartContainer() {
         }
 
         return () => {
-            console.log("PieChartContainer unmounting");
             pieChartD3Refs.current.forEach((pieChart) => pieChart.clear());
         };
     }, [data]);
 
     // Update pie charts with the processed data
     useEffect(() => {
-        console.log("Updating PieCharts with new data");
         for (let i = 0; i < data.length; i++) {
             const item = data[i];
             if (item && divPieChartContainerRefs.current[i]) {

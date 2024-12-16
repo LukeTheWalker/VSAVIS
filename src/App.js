@@ -7,8 +7,7 @@ import TimeSeriesContainer from './components/TimeSeries/TimeSeriesContainer';
 import B2BHistoContainer from './components/B2BHisto/B2BHistoContainer';
 import HistoTimeLineContainer from './components/HistoTimeLine/HistoTimeLineContainer';
 import { setSelectedValue } from './redux/SelectionSlice';
-import PieChartContainer from './components/PieChart/PieChartContatiner';
-
+import PieChartContainer from './components/PieChart/PieChartContainer';
 
 function App() {
     const dispatch = useDispatch();
@@ -42,10 +41,10 @@ function App() {
     const selectedValueFirewall = useSelector(state => state.selection.dropdownFirewall);
     const selectedValueModeFIR = useSelector(state => state.selection.dropdownModeFIR);
     const selectedValueNumBins = useSelector(state => state.selection.numBins);
+    const selectedValueHeat = useSelector(state => state.selection.dropdownHeat);
 
     return (
         <div className="App">
-            <HeatMapContainer />
             <TimeSeriesContainer />
 
             <div className="dropdown-grid">
@@ -64,6 +63,7 @@ function App() {
                         <option value="Destination service">Destination service</option>
                         <option value="Direction">Direction</option>
                         <option value="Protocol">Protocol</option>
+                        <option value="Destination IP">Destination IP</option>
                     </select>
 
                     <label htmlFor="dropdownModeFIR" className="dropdown-label">Choose an attribute for the Firewall Mode:</label>
@@ -76,6 +76,23 @@ function App() {
                         <option value="count">Count</option>
                         <option value="log">Log</option>
                         <option value="unique">Unique</option>
+                    </select>
+
+                    <label htmlFor="dropdownHeat" className="dropdown-label">Choose an attribute for the HeatMap:</label>
+                    <select
+                        id="dropdownHeat"
+                        className="dropdown-select"
+                        onChange={(e) => handleChange('dropdownHeat', e)}
+                        defaultValue={selectedValueHeat}
+                    >
+                        <option value="classification">IDS/Classification</option>
+                        <option value="priority">IDS/Priority</option>
+                        <option value="label">IDS/Label</option>
+                        <option value="Syslog priority">FIR/Syslog priority</option>
+                        <option value="Operation">FIR/Operation</option>
+                        <option value="Protocol">FIR/Protocol</option>
+                        <option value="Destination service">FIR/Destination service</option>
+                        <option value="Direction">FIR/Direction</option>
                     </select>
                 </div>
 
@@ -119,8 +136,29 @@ function App() {
             </div>
             <HistoTimeLineContainer />
             <B2BHistoContainer />
-            <PieChartContainer />
+            <hr className="separator" />
+            <br />
+            <div className="HeatAndPieContainer w-full grid grid-cols-2 gap-4">
+                <div className="border rounded-lg shadow-sm">
+                    <div className="p-4 border-b">
+                    <h2 className="text-xl font-semibold">Heatmap</h2>
+                    </div>
+                    <div className="p-4">
+                    <HeatMapContainer />
+                    </div>
+                </div>
+                
+                <div className="border rounded-lg shadow-sm">
+                    <div className="p-4 border-b">
+                    <h2 className="text-xl font-semibold">Pie Chart</h2>
+                    </div>
+                    <div className="p-4">
+                    <PieChartContainer />
+                    </div>
+                </div>
+            </div>
         </div>
+
     );
 }
 

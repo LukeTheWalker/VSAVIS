@@ -1,125 +1,230 @@
 import * as d3 from 'd3';
 
-class PieChartD3 {
-    constructor(container) {
-        this.container = container;
-        this.svg = null;
-        this.radius = 0; // Radius will be calculated dynamically
-        this.color = d3.scaleOrdinal(d3.schemeCategory10);
+class pieChartD3 {
+    margin = {top: 50, right: 20, bottom: 20, left: 20}; // Adjust top margin for legend
+    size;
+    height;
+    width;
+    matSvg;
+    data;
+
+    // Circle packing specific properties
+    colorScheme = d3.schemeCategory10;
+    packLayout = d3.pack();
+    colorScale = d3.scaleOrdinal(this.colorScheme);
+
+    pie = d3.pie().value(d => d[Object.keys(d)[0]]);
+    arc = d3.arc();
+
+    sliceNames;
+
+    constructor(el) {
+        this.el = el;
     }
 
-    create({ size }) {
-        const { width, height } = size;
-        const svgWidth = width * 1.5; // Increase SVG size by 1.5 times (or adjust as needed)
-        const svgHeight = height * 1.5; // Same for height
+    create = function(config) {
+        // Set overall size
+        this.size = {width: config.size.width, height: config.size.height};
 
-        // Set the radius to 70% of the SVG size
-        this.radius = Math.min(svgWidth, svgHeight) * 0.35; // 70% of the SVG width/height
+        // Calculate effective size by subtracting margins
+        this.width = this.size.width - this.margin.left - this.margin.right;
+        this.height = this.size.height - this.margin.top - this.margin.bottom;
 
-        // Create the SVG with increased size
-        this.svg = d3.select(this.container)
-            .append('svg')
-            .attr('width', svgWidth)
-            .attr('height', svgHeight)
-            .append('g')
-            .attr('transform', `translate(${svgWidth / 2}, ${svgHeight / 2})`); // Center the pie chart
-            
+        // Configure pack layout
+        this.packLayout
+            .size([this.width, this.height])
+            .padding(3);
 
+        // Initialize SVG
+        this.matSvg = d3.select(this.el).append("svg")
+            .attr("width", this.width + this.margin.left + this.margin.right)
+            .attr("height", this.height + this.margin.top + this.margin.bottom)
+            .append("g")
+            .attr("class", "circle-packing-g")
+            .attr("transform", `translate(${this.margin.left},${this.margin.top})`);
+
+        // Add a group for the legend
+        this.matSvg.append("g")
+            .attr("class", "legend-group")
+            .attr("transform", "translate(0,-30)"); // Position above the chart
+
+        this.sliceNames = []
     }
 
-    update(data, key) {
-        if (!data || !this.svg) return;
-    
-        const pie = d3.pie().value(d => d.value);
-        const arc = d3.arc().innerRadius(0).outerRadius(this.radius);
-        const outerArc = d3.arc().innerRadius(this.radius * 1.05).outerRadius(this.radius * 1.05); // Arc for labels
-    
-        const pieData = pie(data);
-        const containerSize = this.radius * 2; // Approximate container size (diameter)
-    
-        // Check if only one category exists
-        const singleCategory = pieData.length === 1;
-    
-        // Update paths for pie slices
-        const paths = this.svg.selectAll('path').data(pieData);
-    
-        paths.enter()
-            .append('path')
-            .attr('d', arc)
-            .attr('fill', d => this.color(d.data.label))
-            .merge(paths)
-            .transition()
-            .duration(500)
-            .attr('d', arc);
-    
-        paths.exit().remove();
-    
-        // Handle single category: Place label in the center
-        if (singleCategory) {
-            // Remove any existing lines
-            this.svg.selectAll('line').remove();
-    
-            // Update label in the center
-            const labels = this.svg.selectAll('text').data(pieData);
-    
-            labels.enter()
-                .append('text')
-                .text(d => d.data.label)
-                .attr('text-anchor', 'middle') // Center-align text
-                .style('font-size', '25px')
-                .style('fill', 'black')
-                .merge(labels)
-                .transition()
-                .duration(500)
-                .attr('transform', `translate(0, 0)`); // Position at the center
-    
-            labels.exit().remove();
-        } else {
-    
-            // Update labels outside the pie chart
-            const labels = this.svg.selectAll('text').data(pieData);
-    
-            labels.enter()
-            .append('text')
-            .text(d => d.data.label)
-            .attr('text-anchor', d => outerArc.centroid(d)[0] > 0 ? 'start' : 'end') // Align left or right
-            .style('font-size', '25px')
-            .style('fill', 'black')
-            .attr('transform', d => `translate(${outerArc.centroid(d)})`) // Initial position
-            .each(function (d) {
-                // Dynamically adjust positions after calculating text size
-                const textElem = d3.select(this);
-                const bbox = this.getBBox(); // Get the size of the text element
-                const [x, y] = outerArc.centroid(d);
+    // Update individual circle elements
+    updatePieChart(selection) {
+        const self = this;
+        // Set the radius for each pie chart based on the circle's radius
+        selection.each(function(d) {
+            // Configure the arc generator for this specific pie
+            self.arc.innerRadius(0)
+                .outerRadius(d.r);
 
-                // Adjust positions to ensure the text fits within the container
-                const adjustedX = Math.max(
-                    -containerSize / 2 + bbox.width / 2 + 10, 
-                    Math.min(containerSize / 2 - bbox.width / 2 - 10, x)
-                );
-                const adjustedY = Math.max(
-                    -containerSize / 2 + bbox.height / 2 + 10, 
-                    Math.min(containerSize / 2 - bbox.height / 2 - 10, y)
-                );
+            // Create pie chart data from the slices
+            const pieData = self.pie(d.data.slices);
 
-                textElem.attr('transform', `translate(${adjustedX}, ${adjustedY})`);
-            })
-            .merge(labels)
-            .transition()
-            .duration(500)
-            .attr('text-anchor', d => outerArc.centroid(d)[0] > 0 ? 'start' : 'end'); // Keep alignment consistent
+            // Create/update pie segments
+            d3.select(this)
+                .selectAll(".segment")
+                .data(pieData)
+                .join("path")
+                .attr("class", "segment")
+                .attr("d", self.arc)
+                // .attr("fill", (d, i) => self.colorScale(this.sliceNames[this.sliceNames.indexOf(d)]))
+                .attr("fill", (d, i) => {
+                    const name = Object.keys(d.data)[0];
+                    return self.colorScale(self.sliceNames.indexOf(name));
+                })
+                .attr("opacity", 0.7)
+                .attr("stroke", "white")
+                .attr("stroke-width", 1);
 
-        labels.exit().remove();
+            // Append protocol name at the center
+            const text = d3.select(this)
+                .selectAll(".protocol-name")
+                .data([d])
+                .join("text")
+                .attr("class", "protocol-name")
+                .attr("text-anchor", "middle")
+                .attr("dy", ".35em")
+                .text(d.data.name)
+                .attr("font-size", d => Math.min(d.r / 3, 12))
+                .attr("fill", "black")
+                .attr("font-weight", "bold");
 
+            // Append background rectangle for text
+            const bbox = text.node().getBBox();
+            d3.select(this)
+                .selectAll(".text-bg")
+                .data([d])
+                .join("rect")
+                .attr("class", "text-bg")
+                .attr("x", bbox.x - 2)
+                .attr("y", bbox.y - 2)
+                .attr("width", bbox.width + 4)
+                .attr("height", bbox.height + 4)
+                .attr("fill", "white")
+                .attr("opacity", 0.8)
+                .attr("rx", 5) // Rounded corners
+                .attr("ry", 5);
+
+            text.raise();
+        });
+
+        // Position the pie charts
+        selection.attr("transform", d => `translate(${d.x},${d.y})`);
+    }
+
+    // Render the legend
+    renderLegend = function(sliceNames) {
+        const legendGroup = this.matSvg.select(".legend-group");
+
+        // Bind data to legend items
+        const legend = legendGroup.selectAll("g.legend-item")
+            .data(sliceNames)
+            .join("g")
+            .attr("class", "legend-item")
+            .attr("transform", (d, i) => `translate(${i * 100}, 0)`);
+
+        // Add colored rectangles
+        legend.selectAll("rect")
+            .data(d => [d])
+            .join("rect")
+            .attr("width", 20)
+            .attr("height", 20)
+            .attr("fill", (d, i) => this.colorScale(this.sliceNames.indexOf(d)))
+            .attr("opacity", 0.7);
+
+        // Add labels
+        legend.selectAll("text")
+            .data(d => [d])
+            .join("text")
+            .attr("x", 25)
+            .attr("y", 15)
+            .text(d => d)
+            .attr("font-size", 12)
+            .attr("fill", "black");
+
+        // Adjust legend item positions based on text width
+        let cumulativeWidth = 0;
+        legend.attr("transform", function(d, i) {
+            const textWidth = d3.select(this).select("text").node().getBBox().width;
+            const xOffset = cumulativeWidth;
+            cumulativeWidth += textWidth + 40; // 40 is the width of rect + some padding
+            return `translate(${xOffset}, 0)`;
+        });
+    }
+
+    // Main render method
+    renderPieChart = function(visData) {
+        if (!visData || (typeof visData === 'object' && !Array.isArray(visData))) {
+            return;
         }
-    }
+
+        this.data = visData;
+
+        const processedData = visData.map(entry => {
+            // pick up the first key in the object
+            const name = Object.keys(entry)[0];
+            const array_values = entry[name];
+            // for each element of the array, sum the values
+            const value = Math.log2(array_values.reduce(
+                (acc, curr) => { 
+                    // pick the first key in the object
+                    const key = Object.keys(curr)[0];
+                    // sum the values
+                    return acc + curr[key];
+                } , 0));
+            const slices = array_values;
+            return { name, value, slices };
+        });
+
+        processedData.forEach(d => {
+            d.slices.forEach(s => {
+                this.sliceNames.push(Object.keys(s)[0]);
+            });
+        });
+
+        // remove duplicates
+        this.sliceNames = [...new Set(this.sliceNames)];
+
+        // Create hierarchy
+        const root = d3.hierarchy({
+            name: "Root",
+            children: processedData
+        })
+        .sum(d => d.value)
+        .sort((a, b) => b.value - a.value);
     
-    clear() {
-        if (this.svg) {
-            this.svg.selectAll('*').remove();
-            this.svg = null;
-        }
+        // Apply pack layout
+        this.packLayout(root);
+    
+        // Data join for circle groups
+        this.matSvg.selectAll(".node-group")
+            .data(root.leaves(), d => d.data.name)
+            .join(
+                enter => {
+                    const nodeG = enter.append("g")
+                        .attr("class", "node-group");
+                    
+                    this.updatePieChart(nodeG);
+                    return nodeG;
+                },
+                update => {
+                    this.updatePieChart(update);
+                    return update;
+                },
+                exit => exit.remove()
+            );
+
+        // Render legend
+        this.renderLegend(this.sliceNames);
+    }
+
+    // Clear the entire visualization
+    clear = function() {
+        d3.select(this.el).selectAll("*").remove();
     }
 }
 
-export default PieChartD3;
+export default pieChartD3;

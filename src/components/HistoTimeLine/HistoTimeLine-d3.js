@@ -125,7 +125,7 @@ class HistoTimeLineD3 {
 
         const area = d3.area()
             .x(d => this.xScale(new Date(d.time)))
-            .y0(this.height-3)
+            .y0(this.height)
             .y1(d => this.yScale(d.count));
 
         this.allDotsG.selectAll(".area").remove();
@@ -148,7 +148,9 @@ class HistoTimeLineD3 {
             .attr("fill", "red")
             .attr("stroke", "black")
             .attr("stroke-width", 1)
-            .on("click", (event, d) => this.handleOnClick(d, event));
+            .on("mouseover", (event, d) => this.handleOnMouseOver(d, event))
+            .on("mouseout", () => this.handleOnMouseOut())
+            .on("click", (event, d) => this.handleOnClick(d));
 
         // From each event, draw a line from the dot to the x axis
         this.allDotsG.selectAll(".event-line").remove();
@@ -168,26 +170,43 @@ class HistoTimeLineD3 {
         return this;
     }
 
-    handleOnClick(d, e) {
-        // Check if the tooltip is already visible for the clicked point
-        let isVisible = this.tooltip.style("opacity") === "1" && this.tooltip.html() === d.description;
+    handleOnMouseOver(d, e) {
+        this.tooltip
+            .html(d.description)
+            .style("left", `${e.pageX}px`)
+            .style("top", `${e.pageY}px`)
+            .style("opacity", 1);
+    }
 
-        // Hide all tooltips
-        d3.select(this.el).selectAll(".tooltip").style("opacity", 0);
+    handleOnMouseOut() {
+        this.tooltip
+            .style("left", "-1000px")
+            .style("top", "-1000px")
+            .style("opacity", 0);
+    }
 
-        // If the tooltip was not visible, show it for the clicked point
-        if (!isVisible) {
-            this.tooltip
-                .html(d.description)
-                .style("left", `${e.pageX}px`)
-                .style("top", `${e.pageY}px`)
-                .style("opacity", 1);
-        } else {
-            // move the tooltip away from the screen 
-            this.tooltip.style("left", "-1000px")
-                .style("top", "-1000px")
-                .style("opacity", 0);
-        }
+    handleOnClick(d) {
+        const hood = 10;
+
+        const startTime = new Date(d.time);
+        startTime.setMinutes(startTime.getMinutes() - hood);
+
+        const endTime = new Date(d.time);
+        endTime.setMinutes(endTime.getMinutes() + hood);
+
+        // add 1 second to the end time
+        endTime.setSeconds(endTime.getSeconds() + 1);
+        // and to the begin time
+        startTime.setSeconds(startTime.getSeconds() + 1);
+
+        const timeFormat = d3.timeFormat('%Y-%m-%d %H:%M:%S');
+
+
+        this.behaviors.timeLineSelection({
+            start: timeFormat(startTime),
+            end: timeFormat(endTime)
+        });
+        
     }
 
     renderHistoTimeLine(data, behaviors) {

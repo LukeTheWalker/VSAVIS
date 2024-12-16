@@ -17,8 +17,6 @@ export const getHistoTimeLineData = createAsyncThunk('histoTimeLineSlice/getHist
     const times = responseJSON.content.times;
 
 
-    console.log("Response JSON", responseJSON);
-
     const histogram = times.map((time, index) => {
         const currentTime = new Date(time).getTime();
         const nextTime = index < times.length - 1 ? new Date(times[index + 1]).getTime() : currentTime;
@@ -36,9 +34,6 @@ export const getHistoTimeLineData = createAsyncThunk('histoTimeLineSlice/getHist
         "histogram": histogram,
         "events": responseJSON.content.events
     }
-
-    console.log("Final obj", final_obj);
-
 
     return final_obj;
 });

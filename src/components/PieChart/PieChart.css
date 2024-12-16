@@ -1,42 +1,40 @@
+.packed-charts-wrapper {
+    width: 100%;
+    height: 100vh;
+    padding: 20px;
+    display: flex;
+}
 
+.pie-chart-container {
+    width: 100%;
+    height: 100%;
+}
+
+.pie-chart-name {
+    font-weight: bold;
+    font-size: 14px;
+    fill: #333;
+    text-transform: uppercase;
+}
+
+/* Maintain the hover effect for pie chart segments */
 path {
     transition: transform 0.2s ease-in-out;
     cursor: pointer;
 }
 
 path:hover {
-    transform: scale(1.1);
+    transform: scale(1.05);
 }
 
-.pie-charts-wrapper {
-    display: flex;
-    flex-wrap: wrap; /* Ensure all charts are in one row */
-    justify-content: flex-start; /* Align items to the left */
-    gap: 20px; /* Space between charts */
-    /* overflow-x: auto; Allow horizontal scrolling if needed */
-    width: 100%; /* Full width of the container */
-    height: 100%; /* Full height of the container */
+/* Add responsive adjustments */
+@media screen and (max-width: 768px) {
+    .packed-charts-wrapper {
+        height: 150vh; /* Taller on mobile */
+        padding: 10px;
+    }
 
-}
-
-.pie-chart-container {
-    /* flex-shrink: 0; */
-    flex-direction: column;
-    justify-content: flex-start;
-    height: 50%;
-    width: auto;
-    /* position: relative; */
-}
-
-.pie-chart-d3 {
-    width: 70%; /* Ensure the pie chart fills the container */
-    height: 50%; /* Ensure the pie chart fills the container */
-}
-
-.pie-chart-name {
-    text-align: center;
-    margin-top: 10px;
-    font-weight: bold;
-    font-size: 14px; /* Adjust size if needed */
-    color: #333; /* Adjust color if needed */
+    .pie-chart-name {
+        font-size: 12px;
+    }
 }

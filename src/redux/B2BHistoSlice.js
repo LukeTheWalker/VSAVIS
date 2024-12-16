@@ -49,8 +49,6 @@ export const getB2BHistoData = createAsyncThunk('b2bHistoSlice/getB2BHistData', 
         end: end_param
     })  
 
-    // console.log("Query parameters: ", queryParameters);
-    // console.log("Query string: ", queryParameters.toString());
 
     // const response = await fetch('http://localhost:5000/getB2BHistData?' + queryParameters.toString());
     const response = await fetch(server + '/getB2BHistData?' + queryParameters.toString(), {
@@ -60,7 +58,6 @@ export const getB2BHistoData = createAsyncThunk('b2bHistoSlice/getB2BHistData', 
     });
     const responseJson = await response.json();
 
-    // console.log("Response JSON: ", responseJson);
     return responseJson;
 });
 
