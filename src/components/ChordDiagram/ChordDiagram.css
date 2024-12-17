@@ -8,8 +8,12 @@
 .chord path {
     fill-opacity: 0.7;
     transition: fill-opacity 0.3s;
+    stroke-width: 1px;
+    stroke: #000;
 }
 
 .chord path:hover {
     fill-opacity: 1;
 }
+
+

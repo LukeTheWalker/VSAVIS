@@ -8,6 +8,8 @@ import B2BHistoContainer from './components/B2BHisto/B2BHistoContainer';
 import HistoTimeLineContainer from './components/HistoTimeLine/HistoTimeLineContainer';
 import { setSelectedValue } from './redux/SelectionSlice';
 import PieChartContainer from './components/PieChart/PieChartContainer';
+import ChordDiagramContainer from './components/ChordDiagram/ChordDiagramContainer';
+import SankeyDiagramContainer from './components/SankeyDiagram/SankeyDiagramContainer';
 
 function App() {
     const dispatch = useDispatch();
@@ -157,6 +159,28 @@ function App() {
                     <PieChartContainer />
                     </div>
                 </div>
+            </div>
+
+            <div className='ChordAndSankeyContainer w-full grid grid-cols-2 gap-4'>
+                <div className='border rounded-lg shadow-sm'>
+                    <div className="p-4 border-b">
+                        <h2 className="text-xl font-semibold text-center">Chord Diagram</h2>
+                    </div>
+                    <div className="p-4">
+                    <ChordDiagramContainer />
+                    </div>
+
+
+                </div>
+
+                {/* <div className='border rounded-lg shadow-sm'>
+                    <div className="p-4 border-b">
+                        <h2 className="text-xl font-semibold text-center">Sankey Diagram</h2>
+                    </div>
+                    <div className="p-4">
+                    <SankeyDiagramContainer />
+                    </div>
+                </div> */}
             </div>
         </div>
 

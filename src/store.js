@@ -6,6 +6,8 @@ import selectSliceReducer from './redux/SelectionSlice'
 import histoTimeLineReducer from './redux/HistoTimeLineSlice'
 import PieChartReducer from './redux/PieChartSlice'
 import ChordDiagramReducer from './redux/ChordDiagramSlice'
+import sankeyDiagramReducer from './redux/SankeyDiagramSlice'
+
 export default configureStore({
   reducer: {
     heatmap: heatmapReducer,
@@ -14,6 +16,7 @@ export default configureStore({
     selection: selectSliceReducer,
     histoTimeline: histoTimeLineReducer,
     piechart: PieChartReducer,
-    chordDiagram: ChordDiagramReducer
+    chordDiagram: ChordDiagramReducer,
+    sankey: sankeyDiagramReducer
     }
 })

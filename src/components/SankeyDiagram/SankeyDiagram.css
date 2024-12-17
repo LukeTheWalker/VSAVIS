@@ -1,0 +1,58 @@
+/* Container for the Sankey diagram */
+.sankeyDiagramDivContainer {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+/* Sankey Node Rectangles */
+.sankey-node rect {
+    fill: #007bff; /* Default blue color for nodes */
+    stroke: #000; /* Black border around nodes */
+    stroke-width: 1px;
+    transition: fill 0.3s, stroke 0.3s;
+}
+
+/* Highlight nodes on hover */
+.sankey-node rect:hover {
+    fill: #0056b3; /* Darker blue for hover effect */
+    stroke: #333;
+    stroke-width: 2px;
+}
+
+/* Node Labels */
+.sankey-node text {
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    fill: #333; /* Dark gray for text */
+    pointer-events: none; /* Prevent interfering with interactions */
+    text-anchor: middle;
+}
+
+/* Tooltip for interactive details */
+.sankey-tooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    pointer-events: none;
+    visibility: hidden;
+    z-index: 10;
+}
+
+/* Sankey Links */
+.sankey-link {
+    stroke: #aaa; /* Light gray for links */
+    fill: none;
+    transition: stroke-opacity 0.3s;
+    opacity: 0.6;
+}
+
+/* Highlight links on hover */
+.sankey-link:hover {
+    stroke: #333; /* Darker gray on hover */
+    opacity: 1;
+}

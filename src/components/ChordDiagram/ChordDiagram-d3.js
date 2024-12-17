@@ -6,7 +6,6 @@ class chordDiagramD3 {
     height;
     width;
     svg;
-    tooltip;
     data;
 
     colorScheme = d3.schemeCategory10;
@@ -53,20 +52,6 @@ class chordDiagramD3 {
             .append("g")
             .attr("class", "legend-group")
             .attr("transform", `translate(${-this.width / 2}, -${this.height / 2})`);
-
-        // Tooltip setup
-        this.tooltip = d3
-            .select(this.el)
-            .append("div")
-            .attr("class", "tooltip")
-            .style("position", "absolute")
-            .style("visibility", "hidden")
-            .style("background", "rgba(0, 0, 0, 0.7)")
-            .style("color", "#fff")
-            .style("padding", "5px 10px")
-            .style("border-radius", "4px")
-            .style("pointer-events", "none")
-            .style("font-size", "12px");
     };
 
     updateChordDiagram = function (data) {
@@ -79,8 +64,7 @@ class chordDiagramD3 {
         const ports = nodes.filter((node) => node.group === "port");
 
         // Define color scale for services
-        this.colorScale = d3
-            .scaleOrdinal()
+        this.colorScale = d3.scaleOrdinal()
             .domain(services.map((node) => node.name))
             .range(d3.schemeTableau10);
 
@@ -98,20 +82,25 @@ class chordDiagramD3 {
             .append("path")
             .attr("d", this.arcGenerator.innerRadius(this.innerRadius).outerRadius(this.outerRadius))
             .attr("fill", (d) => this.getNodeColor(nodes[d.index]))
-            .attr("stroke", (d) => d3.rgb(this.getNodeColor(nodes[d.index])).darker())
-            .on("mouseover", (event, d) => {
-                this.tooltip
-                    .style("visibility", "visible")
-                    .html(`Name: <b>${nodes[d.index].name}</b><br>Group: ${nodes[d.index].group}`)
-                    .style("top", `${event.pageY - 30}px`)
-                    .style("left", `${event.pageX + 10}px`);
+            .attr("stroke", (d) => d3.rgb(this.getNodeColor(nodes[d.index])).darker());
+
+        groups
+            .append("text")
+            .each((d) => {
+                d.angle = (d.startAngle + d.endAngle) / 2;
             })
-            .on("mousemove", (event) => {
-                this.tooltip
-                    .style("top", `${event.pageY - 30}px`)
-                    .style("left", `${event.pageX + 10}px`);
-            })
-            .on("mouseout", () => this.tooltip.style("visibility", "hidden"));
+            .attr("dy", "0.35em")
+            .attr(
+                "transform",
+                (d) =>
+                    `rotate(${(d.angle * 180) / Math.PI - 90}) translate(${this.outerRadius + 10}) ${
+                        d.angle > Math.PI ? "rotate(180)" : ""
+                    }`
+            )
+            .attr("text-anchor", (d) => (d.angle > Math.PI ? "end" : null))
+            .text((d) => nodes[d.index].name)
+            .attr("font-size", "10px")
+            .attr("fill", "#333");
 
         // Draw ribbons for relationships
         this.svg
@@ -123,21 +112,11 @@ class chordDiagramD3 {
             .attr("fill", (d) => this.getNodeColor(nodes[d.source.index]))
             .attr("stroke", (d) => d3.rgb(this.getNodeColor(nodes[d.source.index])).darker())
             .attr("opacity", 0.8)
-            .on("mouseover", (event, d) => {
-                this.tooltip
-                    .style("visibility", "visible")
-                    .html(
-                        `Service: <b>${nodes[d.source.index].name}</b><br>Port: <b>${nodes[d.target.index].name}</b><br>Value: ${d.source.value}`
-                    )
-                    .style("top", `${event.pageY - 30}px`)
-                    .style("left", `${event.pageX + 10}px`);
-            })
-            .on("mousemove", (event) => {
-                this.tooltip
-                    .style("top", `${event.pageY - 30}px`)
-                    .style("left", `${event.pageX + 10}px`);
-            })
-            .on("mouseout", () => this.tooltip.style("visibility", "hidden"));
+            .append("title")
+            .text(
+                (d) =>
+                    `Service: ${nodes[d.source.index].name}\nPort: ${nodes[d.target.index].name}\nValue: ${d.source.value}`
+            );
     };
 
     // Method to get the color for a node
